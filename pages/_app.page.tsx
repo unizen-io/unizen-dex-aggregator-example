@@ -11,7 +11,7 @@ import {
   Connection,
   CONNECTIONS
 } from 'utils/helpers/web3/connectors';
-import '../styles/global.css';
+import 'styles/global.css';
 
 function Web3Provider({ children }: { children: ReactNode; }) {
   const connections = CONNECTIONS;

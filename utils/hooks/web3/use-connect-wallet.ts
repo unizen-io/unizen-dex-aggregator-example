@@ -8,11 +8,18 @@ interface Props {
 const useConnectWallet = (): Props => {
   const handleActivate = React.useCallback(
     async () => {
+      const connector = injectedConnection.connector;
       try {
-        injectedConnection &&
-        await injectedConnection.connector.activate();
+        if (connector.connectEagerly) {
+          await connector.connectEagerly();
+        } else {
+          await connector.activate();
+        }
       // eslint-disable-next-line no-empty
-      } catch (err) {}
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.log('err connect wallet', err);
+      }
     },
     []
   );
