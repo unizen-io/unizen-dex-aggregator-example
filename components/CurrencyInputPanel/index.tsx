@@ -4,6 +4,8 @@ import clsx from 'clsx';
 import * as Ariakit from '@ariakit/react';
 import { Currency } from '@uniswap/sdk-core';
 
+import { CHAIN_INFOS } from 'utils/config/chain';
+import { SupportedChainID } from 'utils/config/token';
 import useCurrencyList from 'utils/hooks/web3/use-currency-list';
 
 interface Props {
@@ -35,7 +37,16 @@ function CurrencySelect({
             onClick={() => onCurrencySelect ? onCurrencySelect(currency) : {}}
             className='select-item'
             key={`${currency.symbol}-${currency.chainId}`}>
-            <button>{currency.symbol} {currency.chainId}</button>
+            <div
+              className={clsx(
+                'flex',
+                'justify-between',
+                'items-center',
+                'w-full'
+              )}>
+              <p>{currency.symbol}</p>
+              <p> {CHAIN_INFOS[currency.chainId as SupportedChainID].shortName}</p>
+            </div>
           </Ariakit.SelectItem>
         ))}
       </Ariakit.SelectPopover>

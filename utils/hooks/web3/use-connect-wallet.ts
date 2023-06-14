@@ -9,6 +9,7 @@ const useConnectWallet = (): Props => {
   const handleActivate = React.useCallback(
     async () => {
       const connector = injectedConnection.connector;
+
       try {
         if (connector.connectEagerly) {
           await connector.connectEagerly();

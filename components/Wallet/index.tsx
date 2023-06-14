@@ -2,11 +2,13 @@
 import React from 'react';
 import { useWeb3React } from '@web3-react/core';
 
+import { CHAIN_INFOS } from 'utils/config/chain';
+import { SupportedChainID } from 'utils/config/token';
 import { useConnectWallet } from 'utils/hooks/web3/use-connect-wallet';
 
 const Wallet = () => {
   const { handleActivate } = useConnectWallet();
-  const { account } = useWeb3React();
+  const { account, chainId } = useWeb3React();
 
   const handleConnectWallet = () => {
     handleActivate();
@@ -18,7 +20,7 @@ const Wallet = () => {
         onClick={handleConnectWallet}>
         Connect Wallet
       </button>
-      <span className='ml-2 text-white'>{account}</span>
+      <span>{account} {CHAIN_INFOS[chainId as SupportedChainID]?.name}</span>
     </div>
   );
 };
