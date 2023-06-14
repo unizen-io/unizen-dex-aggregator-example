@@ -1968,6 +1968,11 @@
     tiny-invariant "^1.1.0"
     toformat "^2.0.0"
 
+"@unizen-io/unizen-contract-addresses@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@unizen-io/unizen-contract-addresses/-/unizen-contract-addresses-0.0.2.tgz#a1420446da206f1276683cd3c92c973938772df2"
+  integrity sha512-xi3379G+qKsGc4ZK1U63mLTP+N0O9GFC5kh3/9iA7tI3SK+SNqHKwKCDocpOL+CEpF1Ncci4nQIT8U74D6GVdg==
+
 "@web3-react/core@^8.2.0":
   version "8.2.0"
   resolved "https://registry.yarnpkg.com/@web3-react/core/-/core-8.2.0.tgz#95fb615bb283be520e6f61b5e48cfb0047943808"
