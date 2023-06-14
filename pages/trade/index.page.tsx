@@ -34,10 +34,6 @@ const Trade = () => {
     setCurrencyAmountOut
   ] = React.useState<string>();
   const [
-    isLoading,
-    setIsLoading
-  ] = React.useState<boolean>(false);
-  const [
     singleQuote,
     setSingleQuote
   ] = React.useState<any>();
@@ -59,7 +55,6 @@ const Trade = () => {
         parseUnits(currencyAmountIn || '0', currencyIn?.decimals).toString();
 
       if (fromTokenAddress && toTokenAddress && chainId && amount) {
-        setIsLoading(true);
         const url = getSingleQuoteURL({
           fromTokenAddress: fromTokenAddress,
           toTokenAddress: toTokenAddress,
@@ -84,7 +79,6 @@ const Trade = () => {
           setCurrencyAmountIn(formatUnits(singleQuoteJSON?.[0].fromTokenAmount, currencyIn?.decimals));
         }
         setSingleQuote(singleQuoteJSON);
-        setIsLoading(false);
       }
     }
   };
@@ -118,10 +112,9 @@ const Trade = () => {
           'space-y-4'
         )}>
         <Button
-          disabled={isLoading}
           onClick={handleFetchQuote}
           className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
-        1. Fetch Quote
+            1. Fetch Quote
         </Button>
         <SingleQuoteModal
           quote={singleQuote}

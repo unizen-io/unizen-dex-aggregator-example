@@ -5,9 +5,10 @@ import { Button } from '@ariakit/react';
 import { formatUnits } from '@ethersproject/units';
 import { useWeb3React } from '@web3-react/core';
 
+import { UNIZEN_CONTRACT_ADDRESS } from 'utils/config/address';
+import { SupportedChainID } from 'utils/config/token';
 import { SingleQuoteAPIData } from 'utils/config/type';
 import { getSingleSwapURL } from 'utils/config/urls';
-
 interface Props {
     quote: SingleQuoteAPIData[] | undefined;
     isExactOut: boolean;
@@ -15,11 +16,15 @@ interface Props {
 
 const SingleQuoteModal = ({ quote, isExactOut }: Props) => {
   const dialog = Ariakit.useDialogStore();
-  const { chainId, account } = useWeb3React();
+  const { chainId, account, provider } = useWeb3React();
   const [
     selectedQuote,
     setSelectedQuote
   ] = React.useState<SingleQuoteAPIData | undefined>(quote?.[0]);
+  const [
+    swapData,
+    setSwapData
+  ] = React.useState<any>();
 
   const handleSelectQuote = (quote: SingleQuoteAPIData) => {
     setSelectedQuote(quote);
@@ -52,10 +57,23 @@ const SingleQuoteModal = ({ quote, isExactOut }: Props) => {
           if (data.error || data.message) {
             throw new Error(data.message);
           }
+          setSwapData(data);
           return data;
         });
       return data;
     }
+  };
+
+  const handleSendTransaction = async () => {
+    const contractAddress = UNIZEN_CONTRACT_ADDRESS[swapData.contractVersion as 'v1' | 'v2'][chainId as SupportedChainID];
+
+    provider?.getSigner().sendTransaction({
+      from: account,
+      to: contractAddress,
+      data: swapData.data,
+      //   gasLimit: swapData.estimateGas, // optional
+      value: swapData.nativeValue
+    });
   };
   return (
     <>
@@ -115,7 +133,12 @@ const SingleQuoteModal = ({ quote, isExactOut }: Props) => {
         <Button
           onClick={handleConfirmTrade}
           className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
-            3. Confirm Trade
+            3. Generate tx data
+        </Button>
+        <Button
+          onClick={handleSendTransaction}
+          className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
+            4. Confirm trade
         </Button>
         <div>
           <Ariakit.DialogDismiss className='button'>OK</Ariakit.DialogDismiss>
