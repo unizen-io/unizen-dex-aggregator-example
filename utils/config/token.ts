@@ -209,10 +209,14 @@ const STABLE_TOKENS: { [key in SupportedChainID]: Token[]; } = {
     )
   ]
 };
-
+enum CrossChainTradeProtocol {
+    CROSS_CHAIN_STARGATE = 'CROSS_CHAIN_STARGATE',
+    CROSS_CHAIN_CELER = 'CROSS_CHAIN_CELER',
+}
 export {
   WRAPPED_NATIVE_CURRENCY,
   STABLE_TOKENS,
   NATIVE_CURRENCY,
-  SupportedChainID
+  SupportedChainID,
+  CrossChainTradeProtocol
 };
