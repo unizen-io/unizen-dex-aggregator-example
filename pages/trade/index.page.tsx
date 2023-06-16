@@ -142,38 +142,56 @@ const Trade = () => {
   };
   return (
     <>
-      <Wallet />
-      <span>From</span>
-      <CurrencyInputPanel
-        currency={currencyIn}
-        amount={currencyAmountIn}
-        onCurrencySelect={setCurrencyIn}
-        onCurrencyInput={onCurrencyInInput} />
-      <span>To</span>
-      <CurrencyInputPanel
-        currency={currencyOut}
-        amount={currencyAmountOut}
-        onCurrencySelect={setCurrencyOut}
-        onCurrencyInput={onCurrencyOutInput} />
       <div
         className={clsx(
           'flex',
           'flex-col',
-          'space-y-4'
+          'space-y-4',
+          'items-between',
+          'w-full'
         )}>
-        <Button
-          onClick={handleFetchQuote}
-          className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
+        <Wallet />
+        <div
+          className={clsx(
+            'flex',
+            'flex-col',
+            'items-center',
+            'space-y-1'
+          )}>
+          <span>From</span>
+          <CurrencyInputPanel
+            currency={currencyIn}
+            amount={currencyAmountIn}
+            onCurrencySelect={setCurrencyIn}
+            onCurrencyInput={onCurrencyInInput} />
+          <span>To</span>
+          <CurrencyInputPanel
+            currency={currencyOut}
+            amount={currencyAmountOut}
+            onCurrencySelect={setCurrencyOut}
+            onCurrencyInput={onCurrencyOutInput} />
+        </div>
+        <div
+          className={clsx(
+            'flex',
+            'flex-col',
+            'items-center',
+            'space-y-4'
+          )}>
+          <Button
+            onClick={handleFetchQuote}
+            className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
             1. Fetch Quote
-        </Button>
-        {isCrossChain ?
-          <CrossQuoteModal
-            quote={crossQuote?.[0]}
-            isExactOut={isExactOut} /> :
-          <SingleQuoteModal
-            quote={singleQuote}
-            isExactOut={isExactOut} />
-        }
+          </Button>
+          {isCrossChain ?
+            <CrossQuoteModal
+              quote={crossQuote?.[0]}
+              isExactOut={isExactOut} /> :
+            <SingleQuoteModal
+              quote={singleQuote}
+              isExactOut={isExactOut} />
+          }
+        </div>
       </div>
     </>
   );

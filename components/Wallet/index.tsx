@@ -1,5 +1,6 @@
 
 import React from 'react';
+import clsx from 'clsx';
 import { useWeb3React } from '@web3-react/core';
 
 import { CHAIN_INFOS } from 'utils/config/chain';
@@ -14,8 +15,15 @@ const Wallet = () => {
     handleActivate();
   };
   return (
-    <div className='flex flex-row items-center'>
+    <div
+      className={clsx(
+        'flex',
+        'flex-col',
+        'items-center',
+        'space-y-1'
+      )}>
       <button
+        style={{ width: 200 }}
         className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
         onClick={handleConnectWallet}>
         Connect Wallet
