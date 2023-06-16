@@ -1,5 +1,4 @@
 import * as React from 'react';
-import clsx from 'clsx';
 import * as Ariakit from '@ariakit/react';
 import { Button } from '@ariakit/react';
 import { formatUnits } from '@ethersproject/units';
@@ -9,6 +8,7 @@ import { UNIZEN_CONTRACT_ADDRESS } from 'utils/config/address';
 import { SupportedChainID } from 'utils/config/token';
 import { SingleQuoteAPIData } from 'utils/config/type';
 import { getSingleSwapURL } from 'utils/config/urls';
+import DEXInfoPanel from './DexInfoPanel';
 interface Props {
     quote: SingleQuoteAPIData[] | undefined;
     isExactOut: boolean;
@@ -29,8 +29,6 @@ const SingleQuoteModal = ({ quote, isExactOut }: Props) => {
   const handleSelectQuote = (quote: SingleQuoteAPIData) => {
     setSelectedQuote(quote);
   };
-
-  const deltaAmountLabel = isExactOut ? 'Max Input' : 'Min Receive';
 
   const handleConfirmTrade = async () => {
     if (selectedQuote && chainId) {
@@ -89,36 +87,14 @@ const SingleQuoteModal = ({ quote, isExactOut }: Props) => {
           {quote?.map((item, index) => {
             const deltaToken = isExactOut ? quote?.[0].tokenFrom : quote?.[0].tokenTo;
             return (
-              <div
+              <DEXInfoPanel
                 key={index}
-                onClick={() => handleSelectQuote(item)}
-                className={clsx(
-                  'flex',
-                  'flex-col',
-                  'space-y-1',
-                  'border',
-                  'border-gray-300',
-                  'p-2',
-                  'cursor-pointer',
-                  'hover:bg-gray-100'
-                )}>
-                <span>
-                From Amount: {formatUnits(item.fromTokenAmount, item.tokenFrom?.decimals)}
-                </span>
-                <span>
-                To Amount: {formatUnits(item.toTokenAmount, item.tokenTo?.decimals)}
-                </span>
-                <span>
-                  {deltaAmountLabel}: {formatUnits(item.deltaAmount, deltaToken?.decimals)}
-                </span>
-                <span>
-                DEX: {item.protocol?.map((protocol, index) => (
-                    <span key={index}>
-                      {protocol.name}
-                    </span>
-                  ))}
-                </span>
-              </div>
+                fromAmount={formatUnits(item.fromTokenAmount, item.tokenFrom?.decimals)}
+                toAmount={formatUnits(item.toTokenAmount, item.tokenTo?.decimals)}
+                deltaAmount={formatUnits(item.deltaAmount, deltaToken?.decimals)}
+                quote={item}
+                isExactOut={isExactOut}
+                handleClick={() => handleSelectQuote(item)} />
             );
           })}
         </div>

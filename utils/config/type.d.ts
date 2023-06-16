@@ -47,7 +47,46 @@ interface SingleQuoteAPIData {
         };
         call: CallItem[];
     };
+    call?: CallItem[];
     nativeValue?: string;
     contractVersion?: ContractVersion;
 }
-export { SingleQuoteAPIData };
+
+interface GeneralCrossChainQuoteCallData {
+    srcTradeList: SingleQuoteAPIData[];
+    dstTradeList: SingleQuoteAPIData[];
+    srcTrade: SingleQuoteAPIData;
+    dstTrade: SingleQuoteAPIData;
+    nativeFee: string;
+    processingTime: number;
+    nativeValue: string;
+    sourceChainId: SupportedChainID;
+    destinationChainId: SupportedChainID;
+    contractVersion?: ContractVersion;
+}
+interface StargateQuoteData extends GeneralCrossChainQuoteCallData {
+    transactionData: {
+        srcCalls: CrossChainDataCallTransaction[];
+        dstCalls: CrossChainDataCallTransaction[];
+        params: CrossChainSwapSg;
+        nativeFee: string;
+    };
+    tradeProtocol: CrossChainTradeProtocol.CROSS_CHAIN_STARGATE;
+}
+
+interface CelerQuoteData extends GeneralCrossChainQuoteCallData {
+    transactionData: {
+        srcCalls: CrossChainDataCallTransaction[];
+        dstCalls: CrossChainDataCallTransaction[];
+        params: CrossChainSwapClr;
+        nativeFee: string;
+    };
+    tradeProtocol: CrossChainTradeProtocol.CROSS_CHAIN_CELER;
+}
+
+type CrossChainQuoteCallData = StargateQuoteData | CelerQuoteData;
+
+export {
+  SingleQuoteAPIData,
+  CrossChainQuoteCallData
+};

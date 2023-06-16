@@ -11,11 +11,7 @@ const useConnectWallet = (): Props => {
       const connector = injectedConnection.connector;
 
       try {
-        if (connector.connectEagerly) {
-          await connector.connectEagerly();
-        } else {
-          await connector.activate();
-        }
+        await connector.activate();
       // eslint-disable-next-line no-empty
       } catch (err) {
         // eslint-disable-next-line no-console
