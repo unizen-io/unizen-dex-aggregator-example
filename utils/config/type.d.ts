@@ -45,9 +45,12 @@ interface SingleQuoteAPIData {
             srcToken: string;
             dstToken: string;
         };
+        amountInfo?: {
+            amount: string;
+            actualQuote: string;
+        };
         call: CallItem[];
     };
-    call?: CallItem[];
     nativeValue?: string;
     contractVersion?: ContractVersion;
 }
