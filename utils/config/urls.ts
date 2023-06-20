@@ -30,6 +30,7 @@ interface SingleQuoteAPIProps {
 }
 
 const API_UNIZEN_IO_LINK = 'https://api-dev.zcx.com';
+// const API_UNIZEN_IO_LINK = 'http://localhost:3008';
 function getSingleQuoteURL({
   fromTokenAddress,
   toTokenAddress,
@@ -85,13 +86,17 @@ function getCrossQuoteSelectURL({
 function getCrossSwapURL(chainId: SupportedChainID) {
   return `${API_UNIZEN_IO_LINK}/trade/v1/${chainId}/swap/cross`;
 }
+function getTransactionDataCross(chainId: SupportedChainID) {
+  return `${API_UNIZEN_IO_LINK}/trade/v1/${chainId}/quote/cross-data`;
+}
 
 export {
   getSingleQuoteURL,
   getSingleSwapURL,
   getCrossQuoteURL,
   getCrossQuoteSelectURL,
-  getCrossSwapURL
+  getCrossSwapURL,
+  getTransactionDataCross
 
 };
 

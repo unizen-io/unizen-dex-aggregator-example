@@ -2,7 +2,6 @@ import * as React from 'react';
 import clsx from 'clsx';
 import * as Ariakit from '@ariakit/react';
 import { Button } from '@ariakit/react';
-import { BigNumber } from '@ethersproject/bignumber';
 import { formatUnits } from '@ethersproject/units';
 import { useWeb3React } from '@web3-react/core';
 
@@ -17,7 +16,8 @@ import {
 } from 'utils/config/type';
 import {
   getCrossQuoteSelectURL,
-  getCrossSwapURL
+  getCrossSwapURL,
+  getTransactionDataCross
 } from 'utils/config/urls';
 import DEXInfoPanel from './DexInfoPanel';
 interface Props {
@@ -83,13 +83,52 @@ const CrossQuoteModal = ({ quote, isExactOut, crossChainParams }: Props) => {
     swapData,
     setSwapData
   ] = React.useState<any>();
+  const [
+    transactionData,
+    setTransactionData
+  ] = React.useState<any>();
 
-  const handleSelectSrcQuote = async (quote: SingleQuoteAPIData) => {
-    setSelectedSrcQuote(quote);
+  const fetchTransactionData = async (params: any) => {
+    if (chainId) {
+      const txDataURL = getTransactionDataCross(chainId);
+
+      await fetch(txDataURL, {
+        method: 'POST',
+        headers: { 'x-api-key': process.env.NEXT_PUBLIC_X_API_KEY } as any,
+        body: JSON.stringify(params)
+      })
+        .then(async r => {
+          const data = await r.json();
+
+          if (data.statusCode) {
+            throw new Error(data.message);
+          }
+          setTransactionData(data);
+        })
+        .catch(e => {
+          console.error(e);
+        });
+    }
+  };
+
+  const handleSelectSrcQuote = async (selectedDEXData: SingleQuoteAPIData) => {
+    setSelectedSrcQuote(selectedDEXData);
+    if (isExactOut) {
+      const params = {
+        transactionData: quote?.transactionData,
+        nativeFee: quote?.nativeFee,
+        userSelectedQuoteData: userSelectedQuoteData,
+        srcQuoteTxData: selectedDEXData?.transactionData,
+        dstQuoteTxData: selectedDstQuote?.transactionData,
+        nativeValue: quote?.nativeValue
+      };
+
+      fetchTransactionData(params);
+    }
     if (!isExactOut) {
       const url = getCrossQuoteSelectURL({
         ...crossChainParams,
-        stableAmount: quote.toTokenAmount,
+        stableAmount: selectedDEXData.toTokenAmount,
         tradeProtocol: CrossChainTradeProtocol.CROSS_CHAIN_STARGATE,
         uuid: ''
       });
@@ -104,16 +143,39 @@ const CrossQuoteModal = ({ quote, isExactOut, crossChainParams }: Props) => {
             throw new Error(data.message);
           }
           setUserSelectedQuoteData(data);
+
+          const params = {
+            transactionData: quote?.transactionData,
+            nativeFee: quote?.nativeFee,
+            userSelectedQuoteData: data,
+            srcQuoteTxData: selectedSrcQuote?.transactionData,
+            dstQuoteTxData: selectedDstQuote?.transactionData,
+            nativeValue: quote?.nativeValue
+          };
+
+          fetchTransactionData(params);
           return data;
         });
     }
   };
-  const handleSelectDstQuote = async (quote: SingleQuoteAPIData) => {
-    setSelectedDstQuote(quote);
+  const handleSelectDstQuote = async (selectedDEXData: SingleQuoteAPIData) => {
+    setSelectedDstQuote(selectedDEXData);
+    if (!isExactOut) {
+      const params = {
+        transactionData: quote?.transactionData,
+        nativeFee: quote?.nativeFee,
+        userSelectedQuoteData: userSelectedQuoteData,
+        srcQuoteTxData: selectedSrcQuote?.transactionData,
+        dstQuoteTxData: selectedDEXData?.transactionData,
+        nativeValue: quote?.nativeValue
+      };
+
+      fetchTransactionData(params);
+    }
     if (isExactOut) {
       const url = getCrossQuoteSelectURL({
         ...crossChainParams,
-        stableAmount: quote.fromTokenAmount,
+        stableAmount: selectedDEXData.fromTokenAmount,
         tradeProtocol: CrossChainTradeProtocol.CROSS_CHAIN_STARGATE,
         uuid: ''
       });
@@ -128,66 +190,32 @@ const CrossQuoteModal = ({ quote, isExactOut, crossChainParams }: Props) => {
             throw new Error(data.message);
           }
           setUserSelectedQuoteData(data);
+
+          const params = {
+            transactionData: quote?.transactionData,
+            nativeFee: quote?.nativeFee,
+            userSelectedQuoteData: data,
+            srcQuoteTxData: selectedSrcQuote?.transactionData,
+            dstQuoteTxData: selectedDEXData?.transactionData,
+            nativeValue: quote?.nativeValue
+          };
+          fetchTransactionData(params);
           return data;
         });
     }
   };
-
-  const userSelectedInfo = React.useMemo(() => {
-    if (!isExactOut) {
-      return userSelectedQuoteData?.transactionData?.amountInfo;
-    }
-    if (isExactOut) {
-      return userSelectedQuoteData?.transactionData?.amountInfo;
-    }
-  }, [
-    isExactOut,
-    userSelectedQuoteData?.transactionData?.amountInfo
-  ]);
-
-  const txData = React.useMemo(() => ({
-    ...quote?.transactionData,
-    srcCalls:
-    selectedSrcQuote?.transactionData?.call ??
-    (userSelectedQuoteData?.transactionData?.call ?? quote?.transactionData?.srcCalls),
-    dstCalls:
-    selectedDstQuote?.transactionData?.call ??
-    (userSelectedQuoteData?.transactionData?.call ?? quote?.transactionData?.dstCalls),
-    params: {
-      ...quote?.transactionData?.params,
-      ...userSelectedQuoteData?.transactionData?.params,
-      ...userSelectedInfo
-    }
-  }), [
-    quote?.transactionData,
-    selectedSrcQuote?.transactionData?.call,
-    userSelectedQuoteData?.transactionData?.call,
-    userSelectedQuoteData?.transactionData?.params,
-    selectedDstQuote?.transactionData?.call,
-    userSelectedInfo
-  ]);
-
-  let nativeValue: string | undefined = undefined;
-  if (userSelectedInfo && quote) {
-    nativeValue = BigNumber.from(userSelectedInfo?.amount).add(quote.nativeFee).toString();
-  } else if (userSelectedQuoteData && quote) {
-    nativeValue = BigNumber.from(userSelectedQuoteData.nativeValue).add(quote.nativeFee).toString();
-  } else if (quote) {
-    nativeValue = quote.nativeValue;
-  }
 
   const crossChainQuoteData: CrossChainQuoteCallData | undefined = React.useMemo(() =>
     (quote ? {
       ...quote,
       ...userSelectedQuoteData,
-      transactionData: txData,
-      nativeValue
+      transactionData: transactionData,
+      nativeValue: transactionData?.nativeValue
     } as CrossChainQuoteCallData : undefined)
   , [
     quote,
     userSelectedQuoteData,
-    txData,
-    nativeValue
+    transactionData
   ]);
 
   const handleConfirmTrade = async () => {
@@ -195,10 +223,11 @@ const CrossQuoteModal = ({ quote, isExactOut, crossChainParams }: Props) => {
       const url = getCrossSwapURL(chainId);
 
       const params = {
-        transactionData: txData,
-        nativeValue: nativeValue,
+        transactionData: transactionData,
+        nativeValue: transactionData?.nativeValue,
         account
       };
+
       const data = await fetch(url, {
         body: JSON.stringify(params),
         headers: {

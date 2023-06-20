@@ -83,7 +83,11 @@ const Trade = () => {
           toTokenAddress: toTokenAddress,
           chainId,
           amount: amount,
-          isExactOut
+          isExactOut,
+          isSplit: true,
+          slippage: 0.05,
+          uuid: '',
+          deadline: new Date().getTime() + 1000 * 60 * 10
         });
 
         const singleQuote = await fetch(
