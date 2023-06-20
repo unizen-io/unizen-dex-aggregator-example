@@ -2,20 +2,28 @@ import * as React from 'react';
 import clsx from 'clsx';
 import * as Ariakit from '@ariakit/react';
 import { Button } from '@ariakit/react';
+import { BigNumber } from '@ethersproject/bignumber';
 import { formatUnits } from '@ethersproject/units';
 import { useWeb3React } from '@web3-react/core';
 
 import { UNIZEN_CONTRACT_ADDRESS } from 'utils/config/address';
-import { SupportedChainID } from 'utils/config/token';
+import {
+  CrossChainTradeProtocol,
+  SupportedChainID
+} from 'utils/config/token';
 import {
   CrossChainQuoteCallData,
   SingleQuoteAPIData
 } from 'utils/config/type';
-import { getCrossSwapURL } from 'utils/config/urls';
+import {
+  getCrossQuoteSelectURL,
+  getCrossSwapURL
+} from 'utils/config/urls';
 import DEXInfoPanel from './DexInfoPanel';
 interface Props {
     quote: CrossChainQuoteCallData | undefined;
     isExactOut: boolean;
+    crossChainParams: any;
 }
 
 const SourceDEXList = ({
@@ -52,17 +60,21 @@ const SourceDEXList = ({
   );
 };
 
-const CrossQuoteModal = ({ quote, isExactOut }: Props) => {
+const CrossQuoteModal = ({ quote, isExactOut, crossChainParams }: Props) => {
   const dialog = Ariakit.useDialogStore();
   const { chainId, account, provider } = useWeb3React();
   const [
     selectedSrcQuote,
     setSelectedSrcQuote
-  ] = React.useState<SingleQuoteAPIData | undefined>(quote?.srcTrade);
+  ] = React.useState<SingleQuoteAPIData | undefined>();
   const [
     selectedDstQuote,
     setSelectedDstQuote
-  ] = React.useState<SingleQuoteAPIData | undefined>(quote?.dstTrade);
+  ] = React.useState<SingleQuoteAPIData | undefined>();
+  const [
+    userSelectedQuoteData,
+    setUserSelectedQuoteData
+  ] = React.useState<any>();
   const [
     showDexList,
     setShowDexList
@@ -72,35 +84,127 @@ const CrossQuoteModal = ({ quote, isExactOut }: Props) => {
     setSwapData
   ] = React.useState<any>();
 
-  const handleSelectSrcQuote = (quote: SingleQuoteAPIData) => {
+  const handleSelectSrcQuote = async (quote: SingleQuoteAPIData) => {
     setSelectedSrcQuote(quote);
+    if (!isExactOut) {
+      const url = getCrossQuoteSelectURL({
+        ...crossChainParams,
+        stableAmount: quote.toTokenAmount,
+        tradeProtocol: CrossChainTradeProtocol.CROSS_CHAIN_STARGATE,
+        uuid: ''
+      });
+      await fetch(url, {
+        method: 'GET',
+        headers: { 'x-api-key': process.env.NEXT_PUBLIC_X_API_KEY } as any
+      })
+        .then(async r => {
+          const data = await r.json();
+
+          if (data.statusCode) {
+            throw new Error(data.message);
+          }
+          setUserSelectedQuoteData(data);
+          return data;
+        });
+    }
   };
-  const handleSelectDstQuote = (quote: SingleQuoteAPIData) => {
+  const handleSelectDstQuote = async (quote: SingleQuoteAPIData) => {
     setSelectedDstQuote(quote);
+    if (isExactOut) {
+      const url = getCrossQuoteSelectURL({
+        ...crossChainParams,
+        stableAmount: quote.fromTokenAmount,
+        tradeProtocol: CrossChainTradeProtocol.CROSS_CHAIN_STARGATE,
+        uuid: ''
+      });
+      await fetch(url, {
+        method: 'GET',
+        headers: { 'x-api-key': process.env.NEXT_PUBLIC_X_API_KEY } as any
+      })
+        .then(async r => {
+          const data = await r.json();
+
+          if (data.statusCode) {
+            throw new Error(data.message);
+          }
+          setUserSelectedQuoteData(data);
+          return data;
+        });
+    }
   };
 
-  React.useEffect(() => {
-    setSelectedSrcQuote(quote?.srcTrade);
-    setSelectedDstQuote(quote?.dstTrade);
-  }, [quote]);
+  const userSelectedInfo = React.useMemo(() => {
+    if (!isExactOut) {
+      return userSelectedQuoteData?.transactionData?.amountInfo;
+    }
+    if (isExactOut) {
+      return userSelectedQuoteData?.transactionData?.amountInfo;
+    }
+  }, [
+    isExactOut,
+    userSelectedQuoteData?.transactionData?.amountInfo
+  ]);
+
+  const txData = React.useMemo(() => ({
+    ...quote?.transactionData,
+    srcCalls:
+    selectedSrcQuote?.transactionData?.call ??
+    (userSelectedQuoteData?.transactionData?.call ?? quote?.transactionData?.srcCalls),
+    dstCalls:
+    selectedDstQuote?.transactionData?.call ??
+    (userSelectedQuoteData?.transactionData?.call ?? quote?.transactionData?.dstCalls),
+    params: {
+      ...quote?.transactionData?.params,
+      ...userSelectedQuoteData?.transactionData?.params,
+      ...userSelectedInfo
+    }
+  }), [
+    quote?.transactionData,
+    selectedSrcQuote?.transactionData?.call,
+    userSelectedQuoteData?.transactionData?.call,
+    userSelectedQuoteData?.transactionData?.params,
+    selectedDstQuote?.transactionData?.call,
+    userSelectedInfo
+  ]);
+
+  let nativeValue: string | undefined = undefined;
+  if (userSelectedInfo && quote) {
+    nativeValue = BigNumber.from(userSelectedInfo?.amount).add(quote.nativeFee).toString();
+  } else if (userSelectedQuoteData && quote) {
+    nativeValue = BigNumber.from(userSelectedQuoteData.nativeValue).add(quote.nativeFee).toString();
+  } else if (quote) {
+    nativeValue = quote.nativeValue;
+  }
+
+  const crossChainQuoteData: CrossChainQuoteCallData | undefined = React.useMemo(() =>
+    (quote ? {
+      ...quote,
+      ...userSelectedQuoteData,
+      transactionData: txData,
+      nativeValue
+    } as CrossChainQuoteCallData : undefined)
+  , [
+    quote,
+    userSelectedQuoteData,
+    txData,
+    nativeValue
+  ]);
 
   const handleConfirmTrade = async () => {
     if (chainId) {
       const url = getCrossSwapURL(chainId);
-      const transactionData = {
-        ...quote?.transactionData,
-        srcCalls: selectedSrcQuote?.call,
-        dstCalls: selectedDstQuote?.call
-      };
 
       const params = {
-        transactionData: transactionData,
-        nativeValue: quote?.nativeValue,
+        transactionData: txData,
+        nativeValue: nativeValue,
         account
       };
       const data = await fetch(url, {
         body: JSON.stringify(params),
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.NEXT_PUBLIC_X_API_KEY
+        } as any,
         method: 'POST'
       })
         .then(async r => {
@@ -124,13 +228,13 @@ const CrossQuoteModal = ({ quote, isExactOut }: Props) => {
       from: account,
       to: contractAddress,
       data: swapData.data,
-      //   gasLimit: swapData.estimateGas, // optional
       value: swapData.nativeValue
     });
   };
 
   const isShowingSrc = showDexList === 'src';
   const isShowingDst = showDexList === 'dst';
+
   return (
     <>
       <Ariakit.Button
@@ -193,11 +297,11 @@ const CrossQuoteModal = ({ quote, isExactOut }: Props) => {
         </div>
         {isShowingSrc && <SourceDEXList
           handleSelect={handleSelectSrcQuote}
-          dexList={quote?.srcTradeList}
+          dexList={crossChainQuoteData?.srcTradeList}
           isExactOut={isExactOut} />}
         {isShowingDst && <SourceDEXList
           handleSelect={handleSelectDstQuote}
-          dexList={quote?.dstTradeList}
+          dexList={crossChainQuoteData?.dstTradeList}
           isExactOut={isExactOut} />}
         <Button
           onClick={handleConfirmTrade}

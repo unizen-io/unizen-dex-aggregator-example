@@ -46,7 +46,7 @@ const SingleQuoteModal = ({ quote, isExactOut }: Props) => {
 
       const data = await fetch(url, {
         body: JSON.stringify(params),
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.NEXT_PUBLIC_X_API_KEY } as any,
         method: 'POST'
       })
         .then(async r => {

@@ -57,14 +57,26 @@ const Trade = () => {
   const toChainId = currencyOut?.chainId;
   const isCrossChain = fromChainId !== toChainId;
 
+  const fromTokenAddress = currencyIn?.isNative ? AddressZero : currencyIn?.address;
+  const toTokenAddress = currencyOut?.isNative ? AddressZero : currencyOut?.address;
+  const amount = isExactOut ?
+    parseUnits(currencyAmountOut || '0', currencyOut?.decimals).toString() :
+    parseUnits(currencyAmountIn || '0', currencyIn?.decimals).toString();
+
+  let crossChainParams: any;
+  if (fromTokenAddress && toTokenAddress && chainId && amount && currencyOut && account) {
+    crossChainParams = {
+      fromTokenAddress: fromTokenAddress,
+      toTokenAddress: toTokenAddress,
+      sourceChainId: chainId,
+      destinationChainId: currencyOut?.chainId,
+      sender: account,
+      amount: amount,
+      isExactOut
+    };
+  }
   const handleFetchQuote = async () => {
     if (!isCrossChain) {
-      const fromTokenAddress = currencyIn?.isNative ? AddressZero : currencyIn?.address;
-      const toTokenAddress = currencyOut?.isNative ? AddressZero : currencyOut?.address;
-      const amount = isExactOut ?
-        parseUnits(currencyAmountOut || '0', currencyOut?.decimals).toString() :
-        parseUnits(currencyAmountIn || '0', currencyIn?.decimals).toString();
-
       if (fromTokenAddress && toTokenAddress && chainId && amount) {
         const url = getSingleQuoteURL({
           fromTokenAddress: fromTokenAddress,
@@ -77,7 +89,7 @@ const Trade = () => {
         const singleQuote = await fetch(
           url, {
             method: 'GET',
-            headers: { 'x-api-key': process.env.X_API_KEY } as any
+            headers: { 'x-api-key': process.env.NEXT_PUBLIC_X_API_KEY } as any
           }
         );
 
@@ -101,22 +113,13 @@ const Trade = () => {
         parseUnits(currencyAmountIn || '0', currencyIn?.decimals).toString();
 
       if (fromTokenAddress && toTokenAddress && chainId && amount && currencyOut && account) {
-        const url = getCrossQuoteURL({
-          fromTokenAddress: fromTokenAddress,
-          toTokenAddress: toTokenAddress,
-          sourceChainId: chainId,
-          destinationChainId: currencyOut.chainId,
-          sender: account,
-          amount: amount,
-          isExactOut
-        });
+        const url = getCrossQuoteURL(crossChainParams);
 
         const crossQuote = await fetch(
           url, {
             method: 'GET',
-            headers: { 'x-api-key': process.env.X_API_KEY } as any
-          }
-        );
+            headers: { 'x-api-key': process.env.NEXT_PUBLIC_X_API_KEY } as any
+          });
 
         const crossQuoteJSON = await crossQuote.json() as CrossChainQuoteCallData[] | undefined;
         if (!crossQuoteJSON) {
@@ -185,6 +188,7 @@ const Trade = () => {
           </Button>
           {isCrossChain ?
             <CrossQuoteModal
+              crossChainParams={crossChainParams}
               quote={crossQuote?.[0]}
               isExactOut={isExactOut} /> :
             <SingleQuoteModal
