@@ -26,6 +26,10 @@ const SingleQuoteModal = ({ quote, isExactOut }: Props) => {
     setSwapData
   ] = React.useState<any>();
 
+  React.useEffect(() => {
+    setSelectedQuote(quote?.[0]);
+  }, [quote]);
+
   const handleSelectQuote = (quote: SingleQuoteAPIData) => {
     setSelectedQuote(quote);
   };
@@ -112,6 +116,7 @@ const SingleQuoteModal = ({ quote, isExactOut }: Props) => {
             3. Generate tx data
         </Button>
         <Button
+          disabled={!swapData}
           onClick={handleSendTransaction}
           className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
             4. Confirm trade

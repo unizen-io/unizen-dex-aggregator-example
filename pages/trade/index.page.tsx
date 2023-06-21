@@ -53,6 +53,10 @@ const Trade = () => {
     isExactOut,
     setIsExactOut
   ] = React.useState<boolean>(false);
+  const [
+    isFetchingQuote,
+    setIsFetchingQuote
+  ] = React.useState<boolean>(false);
   const fromChainId = currencyIn?.chainId;
   const toChainId = currencyOut?.chainId;
   const isCrossChain = fromChainId !== toChainId;
@@ -76,6 +80,7 @@ const Trade = () => {
     };
   }
   const handleFetchQuote = async () => {
+    setIsFetchingQuote(true);
     if (!isCrossChain) {
       if (fromTokenAddress && toTokenAddress && chainId && amount) {
         const url = getSingleQuoteURL({
@@ -96,7 +101,7 @@ const Trade = () => {
             headers: { 'x-api-key': process.env.NEXT_PUBLIC_X_API_KEY } as any
           }
         );
-
+        setIsFetchingQuote(false);
         const singleQuoteJSON = await singleQuote.json() as SingleQuoteAPIData[] | undefined;
 
         if (!isExactOut && singleQuoteJSON?.[0].toTokenAmount) {
@@ -126,6 +131,7 @@ const Trade = () => {
           });
 
         const crossQuoteJSON = await crossQuote.json() as CrossChainQuoteCallData[] | undefined;
+        setIsFetchingQuote(false);
         if (!crossQuoteJSON) {
           return;
         }
@@ -142,10 +148,30 @@ const Trade = () => {
   const onCurrencyInInput = (amount: string | undefined) => {
     setCurrencyAmountIn(amount);
     setIsExactOut(false);
+    setCurrencyAmountOut(undefined);
+    setSingleQuote(undefined);
+    setCrossQuote(undefined);
   };
   const onCurrencyOutInput = (amount: string | undefined) => {
     setCurrencyAmountOut(amount);
     setIsExactOut(true);
+    setCurrencyAmountIn(undefined);
+    setSingleQuote(undefined);
+    setCrossQuote(undefined);
+  };
+  const onCurrencyInSelect = (currency: Currency) => {
+    setCurrencyIn(currency);
+    setCurrencyAmountIn(undefined);
+    setCurrencyAmountOut(undefined);
+    setSingleQuote(undefined);
+    setCrossQuote(undefined);
+  };
+  const onCurrencyOutSelect = (currency: Currency) => {
+    setCurrencyOut(currency);
+    setCurrencyAmountIn(undefined);
+    setCurrencyAmountOut(undefined);
+    setSingleQuote(undefined);
+    setCrossQuote(undefined);
   };
   return (
     <>
@@ -169,13 +195,13 @@ const Trade = () => {
           <CurrencyInputPanel
             currency={currencyIn}
             amount={currencyAmountIn}
-            onCurrencySelect={setCurrencyIn}
+            onCurrencySelect={onCurrencyInSelect}
             onCurrencyInput={onCurrencyInInput} />
           <span>To</span>
           <CurrencyInputPanel
             currency={currencyOut}
             amount={currencyAmountOut}
-            onCurrencySelect={setCurrencyOut}
+            onCurrencySelect={onCurrencyOutSelect}
             onCurrencyInput={onCurrencyOutInput} />
         </div>
         <div
@@ -188,7 +214,7 @@ const Trade = () => {
           <Button
             onClick={handleFetchQuote}
             className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
-            1. Fetch Quote
+            {isFetchingQuote ? 'Loading' : '1. Fetch Quote'}
           </Button>
           {isCrossChain ?
             <CrossQuoteModal
