@@ -192,6 +192,8 @@ const Trade = () => {
           </Button>
           {isCrossChain ?
             <CrossQuoteModal
+              currencyIn={currencyIn}
+              currencyOut={currencyOut}
               crossChainParams={crossChainParams}
               quote={crossQuote?.[0]}
               isExactOut={isExactOut} /> :
