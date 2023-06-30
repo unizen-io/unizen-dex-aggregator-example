@@ -66,6 +66,7 @@ interface GeneralCrossChainQuoteCallData {
     sourceChainId: SupportedChainID;
     destinationChainId: SupportedChainID;
     contractVersion?: ContractVersion;
+    tradeParams: any;
 }
 interface StargateQuoteData extends GeneralCrossChainQuoteCallData {
     transactionData: {

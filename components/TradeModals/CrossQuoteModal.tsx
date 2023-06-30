@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import * as Ariakit from '@ariakit/react';
 import { Button } from '@ariakit/react';
 import { formatUnits } from '@ethersproject/units';
+import { Currency } from '@uniswap/sdk-core';
 import { useWeb3React } from '@web3-react/core';
 
 import { UNIZEN_CONTRACT_ADDRESS } from 'utils/config/address';
@@ -24,6 +25,8 @@ interface Props {
     quote: CrossChainQuoteCallData | undefined;
     isExactOut: boolean;
     crossChainParams: any;
+    currencyIn: Currency | undefined;
+    currencyOut: Currency | undefined;
 }
 
 const SourceDEXList = ({
@@ -60,7 +63,13 @@ const SourceDEXList = ({
   );
 };
 
-const CrossQuoteModal = ({ quote, isExactOut, crossChainParams }: Props) => {
+const CrossQuoteModal = ({
+  quote,
+  isExactOut,
+  crossChainParams,
+  currencyIn,
+  currencyOut
+}: Props) => {
   const dialog = Ariakit.useDialogStore();
   const { chainId, account, provider } = useWeb3React();
   const [
@@ -88,13 +97,28 @@ const CrossQuoteModal = ({ quote, isExactOut, crossChainParams }: Props) => {
     setTransactionData
   ] = React.useState<any>();
 
+  React.useEffect(() => {
+    if (quote) {
+      setSelectedSrcQuote(quote?.srcTrade);
+      setSelectedDstQuote(quote?.dstTrade);
+    }
+  }, [quote]);
+
+  const finalCrossChainQuoteData: CrossChainQuoteCallData | undefined = {
+    ...quote,
+    ...userSelectedQuoteData
+  };
+
   const fetchTransactionData = async (params: any) => {
     if (chainId) {
       const txDataURL = getTransactionDataCross(chainId);
 
       await fetch(txDataURL, {
         method: 'POST',
-        headers: { 'x-api-key': process.env.NEXT_PUBLIC_X_API_KEY } as any,
+        headers: {
+          'x-api-key': process.env.NEXT_PUBLIC_X_API_KEY,
+          'Content-Type': 'application/json'
+        } as any,
         body: JSON.stringify(params)
       })
         .then(async r => {
@@ -120,7 +144,8 @@ const CrossQuoteModal = ({ quote, isExactOut, crossChainParams }: Props) => {
         userSelectedQuoteData: userSelectedQuoteData,
         srcQuoteTxData: selectedDEXData?.transactionData,
         dstQuoteTxData: selectedDstQuote?.transactionData,
-        nativeValue: quote?.nativeValue
+        nativeValue: quote?.nativeValue,
+        tradeParams: quote?.tradeParams
       };
 
       fetchTransactionData(params);
@@ -143,14 +168,15 @@ const CrossQuoteModal = ({ quote, isExactOut, crossChainParams }: Props) => {
             throw new Error(data.message);
           }
           setUserSelectedQuoteData(data);
-
+          setSelectedDstQuote(data?.dstTrade);
           const params = {
             transactionData: quote?.transactionData,
             nativeFee: quote?.nativeFee,
             userSelectedQuoteData: data,
-            srcQuoteTxData: selectedSrcQuote?.transactionData,
+            srcQuoteTxData: selectedDEXData?.transactionData,
             dstQuoteTxData: selectedDstQuote?.transactionData,
-            nativeValue: quote?.nativeValue
+            nativeValue: quote?.nativeValue,
+            tradeParams: quote?.tradeParams
           };
 
           fetchTransactionData(params);
@@ -167,7 +193,8 @@ const CrossQuoteModal = ({ quote, isExactOut, crossChainParams }: Props) => {
         userSelectedQuoteData: userSelectedQuoteData,
         srcQuoteTxData: selectedSrcQuote?.transactionData,
         dstQuoteTxData: selectedDEXData?.transactionData,
-        nativeValue: quote?.nativeValue
+        nativeValue: quote?.nativeValue,
+        tradeParams: quote?.tradeParams
       };
 
       fetchTransactionData(params);
@@ -190,6 +217,7 @@ const CrossQuoteModal = ({ quote, isExactOut, crossChainParams }: Props) => {
             throw new Error(data.message);
           }
           setUserSelectedQuoteData(data);
+          setSelectedSrcQuote(data?.srcTrade);
 
           const params = {
             transactionData: quote?.transactionData,
@@ -197,7 +225,8 @@ const CrossQuoteModal = ({ quote, isExactOut, crossChainParams }: Props) => {
             userSelectedQuoteData: data,
             srcQuoteTxData: selectedSrcQuote?.transactionData,
             dstQuoteTxData: selectedDEXData?.transactionData,
-            nativeValue: quote?.nativeValue
+            nativeValue: quote?.nativeValue,
+            tradeParams: quote?.tradeParams
           };
           fetchTransactionData(params);
           return data;
@@ -205,48 +234,75 @@ const CrossQuoteModal = ({ quote, isExactOut, crossChainParams }: Props) => {
     }
   };
 
-  const crossChainQuoteData: CrossChainQuoteCallData | undefined = React.useMemo(() =>
-    (quote ? {
-      ...quote,
-      ...userSelectedQuoteData,
-      transactionData: transactionData,
-      nativeValue: transactionData?.nativeValue
-    } as CrossChainQuoteCallData : undefined)
-  , [
-    quote,
-    userSelectedQuoteData,
-    transactionData
-  ]);
-
   const handleConfirmTrade = async () => {
     if (chainId) {
       const url = getCrossSwapURL(chainId);
 
-      const params = {
-        transactionData: transactionData,
-        nativeValue: transactionData?.nativeValue,
-        account
-      };
+      if (transactionData) {
+        const params = {
+          transactionData: transactionData,
+          nativeValue: transactionData?.nativeValue,
+          account
+        };
 
-      const data = await fetch(url, {
-        body: JSON.stringify(params),
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.NEXT_PUBLIC_X_API_KEY
-        } as any,
-        method: 'POST'
-      })
-        .then(async r => {
-          const data = await r.json();
+        const data = await fetch(url, {
+          body: JSON.stringify(params),
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': process.env.NEXT_PUBLIC_X_API_KEY
+          } as any,
+          method: 'POST'
+        })
+          .then(async r => {
+            const data = await r.json();
 
-          if (data.error) {
-            throw new Error(data.message);
-          }
-          setSwapData(data);
-          return data;
-        });
+            if (data.error) {
+              throw new Error(data.message);
+            }
+            setSwapData(data);
+            return data;
+          });
 
-      return data;
+        return data;
+      }
+      if (!transactionData) {
+        const params = {
+          transactionData: quote?.transactionData,
+          nativeFee: quote?.nativeFee,
+          userSelectedQuoteData: userSelectedQuoteData,
+          srcQuoteTxData: selectedSrcQuote?.transactionData,
+          dstQuoteTxData: selectedDstQuote?.transactionData,
+          nativeValue: quote?.nativeValue,
+          tradeParams: quote?.tradeParams
+        };
+        await fetchTransactionData(params);
+
+        const txParams = {
+          transactionData: transactionData,
+          nativeValue: transactionData?.nativeValue,
+          account
+        };
+
+        const data = await fetch(url, {
+          body: JSON.stringify(txParams),
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': process.env.NEXT_PUBLIC_X_API_KEY
+          } as any,
+          method: 'POST'
+        })
+          .then(async r => {
+            const data = await r.json();
+
+            if (data.error) {
+              throw new Error(data.message);
+            }
+            setSwapData(data);
+            return data;
+          });
+
+        return data;
+      }
     }
   };
 
@@ -319,18 +375,18 @@ const CrossQuoteModal = ({ quote, isExactOut, crossChainParams }: Props) => {
         <div>
           <span>
                 Expected Amount: {isExactOut ?
-              formatUnits(selectedSrcQuote?.fromTokenAmount || 0, selectedSrcQuote?.tokenFrom?.decimals) :
-              formatUnits(selectedDstQuote?.toTokenAmount || 0, selectedDstQuote?.tokenTo?.decimals)
+              formatUnits(selectedSrcQuote?.fromTokenAmount || 0, currencyIn?.decimals) :
+              formatUnits(selectedDstQuote?.toTokenAmount || 0, currencyOut?.decimals)
             }
           </span>
         </div>
         {isShowingSrc && <SourceDEXList
           handleSelect={handleSelectSrcQuote}
-          dexList={crossChainQuoteData?.srcTradeList}
+          dexList={finalCrossChainQuoteData?.srcTradeList}
           isExactOut={isExactOut} />}
         {isShowingDst && <SourceDEXList
           handleSelect={handleSelectDstQuote}
-          dexList={crossChainQuoteData?.dstTradeList}
+          dexList={finalCrossChainQuoteData?.dstTradeList}
           isExactOut={isExactOut} />}
         <Button
           onClick={handleConfirmTrade}
