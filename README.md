@@ -23,3 +23,6 @@ The `NPM_TOKEN` environment variable should be set to the authentication token f
 ## Testing project
 This is an instruction on how to trade on a single-chain.
 https://scribehow.com/shared/How_to_trade_Single-chain__NI-W0E2_TU-DHw4CiXWvPw
+
+This is an instruction on how to trade on a cross-chain
+https://scribehow.com/shared/How_to_trade_cross-chain__dRqxGx-RRpWkLXkxDczyrQ
