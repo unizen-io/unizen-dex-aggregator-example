@@ -29,7 +29,7 @@ interface SingleQuoteAPIProps {
     uuid?: string | undefined;
 }
 
-const API_UNIZEN_IO_LINK = 'https://api-dev.zcx.com';
+const API_UNIZEN_IO_LINK = 'https://api.zcx.com';
 // const API_UNIZEN_IO_LINK = 'http://localhost:3008';
 function getSingleQuoteURL({
   fromTokenAddress,

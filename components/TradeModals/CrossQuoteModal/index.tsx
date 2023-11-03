@@ -20,7 +20,8 @@ import {
   getCrossSwapURL,
   getTransactionDataCross
 } from 'utils/config/urls';
-import DEXInfoPanel from './DexInfoPanel';
+import DEXInfoPanel from '../DexInfoPanel';
+
 interface Props {
     quote: CrossChainQuoteCallData | undefined;
     isExactOut: boolean;
@@ -96,6 +97,10 @@ const CrossQuoteModal = ({
     transactionData,
     setTransactionData
   ] = React.useState<any>();
+  const [
+    mode,
+    setMode
+  ] = React.useState<'basic' | 'advanced'>('basic');
 
   React.useEffect(() => {
     if (quote) {
@@ -330,74 +335,126 @@ const CrossQuoteModal = ({
       <Ariakit.Dialog
         store={dialog}
         className='dialog'>
-        <div
-          className={clsx(
-            'flex',
-            'flex-col'
-          )}>
+        <Ariakit.TabProvider defaultSelectedId={mode}>
+          <Ariakit.TabList
+            className='tab-list'
+            aria-label='Version'>
+            <Ariakit.Tab
+              className={clsx(
+                'tab',
+                'rounded-t',
+                'rounded-l',
+                'text-sm',
+                'font-medium',
+                'px-4',
+                'py-2',
+                'leading-5',
+                'outline-none',
+                'ring-2',
+                'ring-blue-500',
+                'ring-opacity-50',
+                mode === 'basic' && 'bg-blue-500'
+              )}
+              as='button'
+              onClick={() => setMode('basic')}
+              id='basic'>
+                Basic
+            </Ariakit.Tab>
+            <Ariakit.Tab
+              className={clsx(
+                'tab',
+                'rounded-t',
+                'rounded-l',
+                'text-sm',
+                'font-medium',
+                'px-4',
+                'py-2',
+                'leading-5',
+                'outline-none',
+                'ring-2',
+                'ring-blue-500',
+                'ring-opacity-50',
+                mode === 'advanced' && 'bg-blue-500'
+              )}
+              as='button'
+              onClick={() => setMode('advanced')}
+              id='advanced'>
+                Advanced
+            </Ariakit.Tab>
+          </Ariakit.TabList>
           <div
             className={clsx(
               'flex',
-              'justify-between'
+              'flex-col'
             )}>
-            <span>
+            <div
+              className={clsx(
+                'flex',
+                'justify-between'
+              )}>
+              <span>
             Selected Source DEX: {selectedSrcQuote?.protocol?.map((protocol, index) => (
-                <span key={index}>
-                  {protocol.name}
-                </span>
-              ))}
-            </span>
-            <Button
-              onClick={() => setShowDexList(isShowingSrc ? undefined : 'src')}
-              className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
-              {isShowingSrc ? 'Hide' : 'Show'} Source DEX List
-            </Button>
+                  <span key={index}>
+                    {protocol.name}
+                  </span>
+                ))}
+              </span>
+              {mode === 'advanced' && (
+                <Button
+                  onClick={() => setShowDexList(isShowingSrc ? undefined : 'src')}
+                  className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
+                  {isShowingSrc ? 'Hide' : 'Show'} Source DEX List
+                </Button>
+              )}
+            </div>
+            <div
+              className={clsx(
+                'flex',
+                'justify-between'
+              )}>
+              <span>
+                Selected Destination DEX: {selectedDstQuote?.protocol?.map((protocol, index) => (
+                  <span key={index}>
+                    {protocol.name}
+                  </span>
+                ))}
+              </span>
+              {mode === 'advanced' && (
+                <Button
+                  onClick={() => setShowDexList(isShowingDst ? undefined : 'dst')}
+                  className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
+                  {isShowingDst ? 'Hide' : 'Show'}  Destination DEX List
+                </Button>
+              )}
+            </div>
           </div>
-          <div
-            className={clsx(
-              'flex',
-              'justify-between'
-            )}>
+          <div>
             <span>
-            Selected Destination DEX: {selectedDstQuote?.protocol?.map((protocol, index) => (
-                <span key={index}>
-                  {protocol.name}
-                </span>
-              ))}
-            </span>
-            <Button
-              onClick={() => setShowDexList(isShowingDst ? undefined : 'dst')}
-              className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
-              {isShowingDst ? 'Hide' : 'Show'}  Destination DEX List
-            </Button>
-          </div>
-        </div>
-        <div>
-          <span>
                 Expected Amount: {isExactOut ?
-              formatUnits(selectedSrcQuote?.fromTokenAmount || 0, currencyIn?.decimals) :
-              formatUnits(selectedDstQuote?.toTokenAmount || 0, currencyOut?.decimals)
-            }
-          </span>
-        </div>
-        {isShowingSrc && <SourceDEXList
-          handleSelect={handleSelectSrcQuote}
-          dexList={finalCrossChainQuoteData?.srcTradeList}
-          isExactOut={isExactOut} />}
-        {isShowingDst && <SourceDEXList
-          handleSelect={handleSelectDstQuote}
-          dexList={finalCrossChainQuoteData?.dstTradeList}
-          isExactOut={isExactOut} />}
-        <Button
-          onClick={handleConfirmTrade}
-          className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
+                formatUnits(selectedSrcQuote?.fromTokenAmount || 0, currencyIn?.decimals) :
+                formatUnits(selectedDstQuote?.toTokenAmount || 0, currencyOut?.decimals)
+              }
+            </span>
+          </div>
+          {isShowingSrc && <SourceDEXList
+            handleSelect={handleSelectSrcQuote}
+            dexList={finalCrossChainQuoteData?.srcTradeList}
+            isExactOut={isExactOut} />}
+          {isShowingDst && <SourceDEXList
+            handleSelect={handleSelectDstQuote}
+            dexList={finalCrossChainQuoteData?.dstTradeList}
+            isExactOut={isExactOut} />}
+          <Button
+            onClick={handleConfirmTrade}
+            className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
             3. Generate tx data
-        </Button>
-        <Button
-          onClick={handleSendTransaction}
-          className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
+          </Button>
+          <Button
+            onClick={handleSendTransaction}
+            className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
             4. Confirm trade
-        </Button>
+          </Button>
+        </Ariakit.TabProvider>
         <div>
           <Ariakit.DialogDismiss className='button'>OK</Ariakit.DialogDismiss>
         </div>
