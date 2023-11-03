@@ -43,6 +43,11 @@ const CHAIN_INFOS: {
     id: SupportedChainID.Optimism,
     name: 'Optimism Mainnet',
     shortName: 'Optimism'
+  },
+  [SupportedChainID.Base]: {
+    id: SupportedChainID.Base,
+    name: 'Base network',
+    shortName: 'Base'
   }
 });
 
