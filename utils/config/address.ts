@@ -17,7 +17,8 @@ const UNIZEN_CONTRACT_ADDRESS: {
     [SupportedChainID.Fantom]: isProduction ? PROD_CONTRACT_ADDRESS.v1.fantom : DEV_CONTRACT_ADDRESS.v1.fantom,
     [SupportedChainID.Avalanche]: isProduction ? PROD_CONTRACT_ADDRESS.v1.avax : DEV_CONTRACT_ADDRESS.v1.avax,
     [SupportedChainID.Arbitrum]: isProduction ? PROD_CONTRACT_ADDRESS.v1.arbitrum : DEV_CONTRACT_ADDRESS.v1.arbitrum,
-    [SupportedChainID.Optimism]: isProduction ? PROD_CONTRACT_ADDRESS.v1.optimism : DEV_CONTRACT_ADDRESS.v1.optimism
+    [SupportedChainID.Optimism]: isProduction ? PROD_CONTRACT_ADDRESS.v1.optimism : DEV_CONTRACT_ADDRESS.v1.optimism,
+    [SupportedChainID.Base]: isProduction ? PROD_CONTRACT_ADDRESS.v1.base : DEV_CONTRACT_ADDRESS.v1.base
   },
   v2: {
     [SupportedChainID.EthereumMainnet]: isProduction ? PROD_CONTRACT_ADDRESS.v2.ethereum : DEV_CONTRACT_ADDRESS.v2.ethereum,
@@ -26,7 +27,8 @@ const UNIZEN_CONTRACT_ADDRESS: {
     [SupportedChainID.Fantom]: isProduction ? PROD_CONTRACT_ADDRESS.v2.fantom : DEV_CONTRACT_ADDRESS.v2.fantom,
     [SupportedChainID.Avalanche]: isProduction ? PROD_CONTRACT_ADDRESS.v2.avax : DEV_CONTRACT_ADDRESS.v2.avax,
     [SupportedChainID.Arbitrum]: isProduction ? PROD_CONTRACT_ADDRESS.v2.arbitrum : DEV_CONTRACT_ADDRESS.v2.arbitrum,
-    [SupportedChainID.Optimism]: isProduction ? PROD_CONTRACT_ADDRESS.v2.optimism : DEV_CONTRACT_ADDRESS.v2.optimism
+    [SupportedChainID.Optimism]: isProduction ? PROD_CONTRACT_ADDRESS.v2.optimism : DEV_CONTRACT_ADDRESS.v2.optimism,
+    [SupportedChainID.Base]: ''
   }
 };
 

@@ -7,7 +7,8 @@ enum SupportedChainID {
     Avalanche = 43114,
     Fantom = 250,
     Optimism = 10,
-    Arbitrum = 42161
+    Arbitrum = 42161,
+    Base = 8453
   }
 const NATIVE_CURRENCY: { [key in SupportedChainID]:
     {name: string; symbol: string; };
@@ -39,6 +40,10 @@ const NATIVE_CURRENCY: { [key in SupportedChainID]:
   [SupportedChainID.Optimism]: {
     symbol: 'ETH',
     name: 'Ethereum'
+  },
+  [SupportedChainID.Base]: {
+    symbol: 'ETH',
+    name: 'Ether'
   }
 };
 
@@ -87,6 +92,13 @@ const WRAPPED_NATIVE_CURRENCY: { [key in SupportedChainID]: Token; } = {
   ),
   [SupportedChainID.Optimism]: new Token(
     SupportedChainID.Fantom,
+    '0x4200000000000000000000000000000000000006',
+    18,
+    'WETH',
+    'Wrapped Ether'
+  ),
+  [SupportedChainID.Base]: new Token(
+    SupportedChainID.Base,
     '0x4200000000000000000000000000000000000006',
     18,
     'WETH',
@@ -206,6 +218,23 @@ const STABLE_TOKENS: { [key in SupportedChainID]: Token[]; } = {
       6,
       'USDC',
       'USD Coin'
+    )
+  ],
+  [SupportedChainID.Base]: [
+    new Token(
+      SupportedChainID.Base,
+      '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',
+      18,
+      'DAI',
+      'DAI'
+    ),
+
+    new Token(
+      SupportedChainID.Base,
+      '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
+      6,
+      'USDC',
+      'USD Base Coin'
     )
   ]
 };
