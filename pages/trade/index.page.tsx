@@ -224,6 +224,7 @@ const Trade = () => {
               quote={crossQuote?.[0]}
               isExactOut={isExactOut} /> :
             <SingleQuoteModal
+              currencyIn={currencyIn}
               quote={singleQuote}
               isExactOut={isExactOut} />
           }

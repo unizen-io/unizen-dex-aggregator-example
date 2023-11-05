@@ -2,19 +2,22 @@ import * as React from 'react';
 import * as Ariakit from '@ariakit/react';
 import { Button } from '@ariakit/react';
 import { formatUnits } from '@ethersproject/units';
+import { Currency } from '@uniswap/sdk-core';
 import { useWeb3React } from '@web3-react/core';
 
 import { UNIZEN_CONTRACT_ADDRESS } from 'utils/config/address';
 import { SupportedChainID } from 'utils/config/token';
 import { SingleQuoteAPIData } from 'utils/config/type';
 import { getSingleSwapURL } from 'utils/config/urls';
+import ApproveButton from './ApproveButton';
 import DEXInfoPanel from './DexInfoPanel';
 interface Props {
     quote: SingleQuoteAPIData[] | undefined;
     isExactOut: boolean;
+    currencyIn: Currency | undefined;
 }
 
-const SingleQuoteModal = ({ quote, isExactOut }: Props) => {
+const SingleQuoteModal = ({ quote, isExactOut, currencyIn }: Props) => {
   const dialog = Ariakit.useDialogStore();
   const { chainId, account, provider } = useWeb3React();
   const [
@@ -115,6 +118,12 @@ const SingleQuoteModal = ({ quote, isExactOut }: Props) => {
           className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
             3. Generate tx data
         </Button>
+        <ApproveButton
+          currency={currencyIn}
+          amount={selectedQuote?.fromTokenAmount}
+          contractAddress={swapData ?
+            UNIZEN_CONTRACT_ADDRESS[swapData.contractVersion as 'v1' | 'v2'][chainId as SupportedChainID] :
+            undefined} />
         <Button
           disabled={!swapData}
           onClick={handleSendTransaction}
