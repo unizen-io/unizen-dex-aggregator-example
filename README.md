@@ -8,6 +8,7 @@ Getting the project up and running
 yarn
 # development
 yarn dev
+The main page will be http://localhost:3000/trade
 
 In order to set up the environment for this project, you are required to create a `.env` file with the following content:
 
@@ -19,6 +20,7 @@ NPM_TOKEN=
 
 The `NEXT_PUBLIC_X_API_KEY` environment variable should be set to the API key (contact us to get API key)
 The `NPM_TOKEN` environment variable should be set to the authentication token for the npm registry being used.
+
 
 ## Testing project
 This is an instruction on how to trade on a single-chain.
