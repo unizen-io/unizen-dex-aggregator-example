@@ -182,7 +182,7 @@ const STABLE_TOKENS: { [key in SupportedChainID]: Token[]; } = {
     ),
     new Token(
       SupportedChainID.Avalanche,
-      '0xf38d6e55b3ef3690330b92f1554a9e309c5af1f2',
+      '0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e',
       6,
       'USDC',
       'USD Coin'
