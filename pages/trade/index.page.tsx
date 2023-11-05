@@ -181,7 +181,9 @@ const Trade = () => {
           'flex-col',
           'space-y-4',
           'items-between',
-          'w-full'
+          'justify-center',
+          'w-full',
+          'h-screen'
         )}>
         <Wallet />
         <div
@@ -191,13 +193,13 @@ const Trade = () => {
             'items-center',
             'space-y-1'
           )}>
-          <span>From</span>
+          <span>Select token from in connected network</span>
           <CurrencyInputPanel
             currency={currencyIn}
             amount={currencyAmountIn}
             onCurrencySelect={onCurrencyInSelect}
             onCurrencyInput={onCurrencyInInput} />
-          <span>To</span>
+          <span>Select token to</span>
           <CurrencyInputPanel
             currency={currencyOut}
             amount={currencyAmountOut}
