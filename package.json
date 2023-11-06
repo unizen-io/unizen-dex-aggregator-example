@@ -1,0 +1,63 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lint-fix": "yarn lint --fix",
+    "postinstall": "husky install",
+    "type-check": "tsc"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "sh -c 'yarn type-check'",
+      "eslint --fix"
+    ]
+  },
+  "dependencies": {
+    "@ariakit/react": "^0.3.5",
+    "@ethersproject/contracts": "^5.7.0",
+    "@ethersproject/units": "^5.7.0",
+    "@tailwindcss/forms": "^0.5.3",
+    "@uniswap/sdk-core": "^3.2.6",
+    "@unizen-io/unizen-contract-addresses": "^0.0.10",
+    "@web3-react/core": "^8.2.0",
+    "@web3-react/metamask": "^8.2.1",
+    "@web3-react/types": "^8.2.0",
+    "clsx": "^1.2.1",
+    "ethers": "^6.8.1",
+    "eventemitter3": "^5.0.1",
+    "next": "13.4.3",
+    "next-transpile-modules": "^10.0.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "^13.2.4",
+    "@types/node": "20.3.0",
+    "@types/react": "^18.2.0",
+    "@types/tailwindcss": "^3.1.0",
+    "@typescript-eslint/eslint-plugin": "^5.58.0",
+    "@typescript-eslint/parser": "^5.54.1",
+    "autoprefixer": "^10.4.14",
+    "eslint": "^8.39.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-config-react-app": "^7.0.1",
+    "eslint-plugin-flowtype": "^8.0.3",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-modules-newlines": "^0.0.7",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
+    "husky": "^8.0.3",
+    "postcss": "^8.4.24",
+    "postcss-flexbugs-fixes": "^5.0.2",
+    "postcss-preset-env": "^8.3.2",
+    "tailwindcss": "^3.3.2",
+    "tailwindcss-pseudo-elements": "^2.0.0",
+    "typescript": "^5.0.2"
+  }
+}
