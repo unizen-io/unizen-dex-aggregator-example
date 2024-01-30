@@ -10,7 +10,6 @@ const useConnectWallet = (): Props => {
   const handleActivate = React.useCallback(
     async () => {
       const connector = injectedConnection.connector;
-
       try {
         await connector.activate();
       // eslint-disable-next-line no-empty

@@ -11,6 +11,7 @@ interface CrossQuoteAPIProps {
     sourceChainId: SupportedChainID;
     destinationChainId: SupportedChainID;
     sender: string;
+    receiver?: string;
     isExactOut?: boolean;
     isVIP?: boolean;
     slippage?: number;
@@ -29,8 +30,8 @@ interface SingleQuoteAPIProps {
     uuid?: string | undefined;
 }
 
-const API_UNIZEN_IO_LINK = 'https://api.zcx.com';
-// const API_UNIZEN_IO_LINK = 'http://localhost:3008';
+// const API_UNIZEN_IO_LINK = 'https://api.zcx.com';
+const API_UNIZEN_IO_LINK = 'http://localhost:3008';
 function getSingleQuoteURL({
   fromTokenAddress,
   toTokenAddress,
@@ -56,13 +57,15 @@ function getCrossQuoteURL({
   sourceChainId,
   destinationChainId,
   sender,
+  receiver,
   isExactOut,
   slippage,
   uuid
 }: CrossQuoteAPIProps) {
   // eslint-disable-next-line max-len
-  return `${API_UNIZEN_IO_LINK}/trade/v1/${sourceChainId}/quote/cross?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&deadline=${deadline}&destinationChainId=${destinationChainId}&sender=${sender}&isExactOut=${isExactOut}&slippage=${slippage}&uuid=${uuid}`;
+  return `${API_UNIZEN_IO_LINK}/trade/v1/${sourceChainId}/quote/cross?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&deadline=${deadline}&destinationChainId=${destinationChainId}&sender=${sender}&isExactOut=${isExactOut}&slippage=${slippage}&uuid=${uuid}&receiver=${receiver}`;
 }
+
 function getCrossQuoteSelectURL({
   fromTokenAddress,
   toTokenAddress,
