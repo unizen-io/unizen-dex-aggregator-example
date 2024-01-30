@@ -14,7 +14,9 @@ import Wallet from 'components/Wallet';
 import {
   BTCTradeType,
   NonEVMSupportedChainID,
-  THORCHAIN_SUPPORTED_CURRENCIES
+  SupportedChainID,
+  THORCHAIN_SUPPORTED_CURRENCIES,
+  THORCHAIN_SUPPORTED_NETWORKS
 } from 'utils/config/token';
 import { CrossChainQuoteCallData } from 'utils/config/type';
 import {
@@ -29,6 +31,34 @@ function getIsXDeFiBitcoin(): boolean {
         (window as any).xfi.bitcoin
   ) ?? false;
 }
+const getIsValidThorchainChainID = ({
+  sourceChainId,
+  destinationChainId
+}: {
+      sourceChainId: SupportedChainID | NonEVMSupportedChainID;
+      destinationChainId: SupportedChainID | NonEVMSupportedChainID;
+  }): {
+      isBTCTrade: boolean;
+      btcTradeType?: BTCTradeType;
+  } => {
+  const isBTCToNative = sourceChainId === NonEVMSupportedChainID.BTC && destinationChainId !== NonEVMSupportedChainID.BTC &&
+          THORCHAIN_SUPPORTED_NETWORKS.includes(destinationChainId as SupportedChainID);
+  const isNativeToBTC = sourceChainId !== NonEVMSupportedChainID.BTC && destinationChainId === NonEVMSupportedChainID.BTC &&
+          THORCHAIN_SUPPORTED_NETWORKS.includes(sourceChainId as SupportedChainID);
+
+  const isBTCTrade = isBTCToNative || isNativeToBTC;
+  if (!isBTCTrade) {
+    return {
+      isBTCTrade,
+      btcTradeType: undefined
+    };
+  }
+  const btcTradeType = isBTCToNative ? BTCTradeType.BTC_TO_NATIVE : BTCTradeType.NATIVE_TO_BTC;
+  return {
+    isBTCTrade: true,
+    btcTradeType
+  };
+};
 
 const BTC_CURRENCY = {
   chainId: NonEVMSupportedChainID.BTC,
@@ -39,7 +69,7 @@ const BTC_CURRENCY = {
 } as Currency;
 
 const TradeBTC = () => {
-  const { account } = useWeb3React();
+  const { account, provider } = useWeb3React();
 
   const [
     btcAddress,
@@ -48,11 +78,11 @@ const TradeBTC = () => {
   const [
     currencyIn,
     setCurrencyIn
-  ] = React.useState(BTC_CURRENCY);
+  ] = React.useState(THORCHAIN_SUPPORTED_CURRENCIES[0]);
   const [
     currencyOut,
     setCurrencyOut
-  ] = React.useState(THORCHAIN_SUPPORTED_CURRENCIES[0]);
+  ] = React.useState(BTC_CURRENCY);
   const [
     currencyAmountIn,
     setCurrencyAmountIn
@@ -93,7 +123,10 @@ const TradeBTC = () => {
 
   const handleFetchQuote = async () => {
     setIsFetchingQuote(true);
-
+    const { btcTradeType } = getIsValidThorchainChainID({
+      sourceChainId: currencyIn.chainId,
+      destinationChainId: currencyOut.chainId
+    });
     const amount = parseUnits(currencyAmountIn || '0', currencyIn?.decimals).toString();
 
     let crossChainParams: any;
@@ -103,8 +136,8 @@ const TradeBTC = () => {
         toTokenAddress: AddressZero,
         sourceChainId: currencyIn.chainId,
         destinationChainId: currencyOut?.chainId,
-        sender: account,
-        receiver: account,
+        sender: btcTradeType === BTCTradeType.BTC_TO_NATIVE ? btcAddress : account,
+        receiver: btcTradeType === BTCTradeType.BTC_TO_NATIVE ? account : btcAddress,
         amount: amount,
         isExactOut: false
       };
@@ -187,6 +220,13 @@ const TradeBTC = () => {
             console.error(error);
           }
         });
+    }
+    if (quote?.transactionData.tradeType === BTCTradeType.NATIVE_TO_BTC) {
+      provider?.getSigner(account)?.sendTransaction({
+        to: swapData.to,
+        data: swapData.data,
+        value: swapData.value
+      });
     }
   };
   return (
