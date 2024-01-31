@@ -13,15 +13,18 @@ interface Props {
     amount: string | undefined;
     onCurrencySelect: (currency: Currency) => void;
     onCurrencyInput: (currencyAmount: string | undefined) => void;
+    customCurrencyList?: Currency[];
 }
 
 function CurrencySelect({
   currency,
+  customCurrencyList,
   onCurrencySelect
 }: Partial<Props>) {
   const currencyList = useCurrencyList();
   const select = Ariakit.useSelectStore({ defaultValue: '', value: currency ? `${currency?.symbol} ${currency?.chainId}` : '' });
 
+  const finalCurrencyList = customCurrencyList ?? currencyList;
   return (
     <div className='wrapper'>
       <Ariakit.Select
@@ -32,7 +35,7 @@ function CurrencySelect({
         gutter={4}
         sameWidth
         className='popover'>
-        {currencyList.map(currency => (
+        {finalCurrencyList.map(currency => (
           <Ariakit.SelectItem
             onClick={() => onCurrencySelect ? onCurrencySelect(currency) : {}}
             className='select-item'
@@ -45,7 +48,7 @@ function CurrencySelect({
                 'w-full'
               )}>
               <p>{currency.symbol}</p>
-              <p> {CHAIN_INFOS[currency.chainId as SupportedChainID].shortName}</p>
+              <p> {CHAIN_INFOS[currency.chainId as SupportedChainID]?.shortName}</p>
             </div>
           </Ariakit.SelectItem>
         ))}
@@ -57,6 +60,7 @@ function CurrencySelect({
 const CurrencyInputPanel = ({
   currency,
   amount,
+  customCurrencyList,
   onCurrencySelect,
   onCurrencyInput
 }: Props) => {
@@ -78,6 +82,7 @@ const CurrencyInputPanel = ({
         onChange={handleChange} />
       <CurrencySelect
         currency={currency}
+        customCurrencyList={customCurrencyList}
         onCurrencySelect={onCurrencySelect} />
     </div>
   );

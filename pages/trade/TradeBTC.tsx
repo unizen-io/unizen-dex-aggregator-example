@@ -68,6 +68,10 @@ const BTC_CURRENCY = {
   address: AddressZero
 } as Currency;
 
+const BTC_TRADE_CURRENCIES = [
+  BTC_CURRENCY,
+  ...THORCHAIN_SUPPORTED_CURRENCIES
+];
 const TradeBTC = () => {
   const { account, provider } = useWeb3React();
 
@@ -269,11 +273,13 @@ const TradeBTC = () => {
           <CurrencyInputPanel
             currency={currencyIn}
             amount={currencyAmountIn}
+            customCurrencyList={BTC_TRADE_CURRENCIES}
             onCurrencySelect={onCurrencyInSelect}
             onCurrencyInput={onCurrencyInInput} />
           <CurrencyInputPanel
             currency={currencyOut}
             amount={currencyAmountOut}
+            customCurrencyList={BTC_TRADE_CURRENCIES}
             onCurrencySelect={onCurrencyOutSelect}
             onCurrencyInput={onCurrencyOutInput} />
           <Button
