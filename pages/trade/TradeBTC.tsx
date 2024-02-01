@@ -231,7 +231,12 @@ const TradeBTC = () => {
   };
   const handleSendTransaction = async () => {
     const inboundAddress = await handleFetchInboundAddress();
+    const expiry = quote.transactionData.expiry;
+    const currentTimestamp = Math.floor(new Date().getTime() / 1000);
 
+    if (currentTimestamp > expiry) {
+      throw new Error('Expired transaction');
+    }
     if (quote?.transactionData.tradeType === BTCTradeType.BTC_TO_NATIVE) {
       const btcInboundAddress = inboundAddress.find((item: any) => item.chain === NonEVMSupportedChainID.BTC);
 
@@ -254,7 +259,7 @@ const TradeBTC = () => {
       provider?.getSigner(account)?.sendTransaction({
         to: swapData.to,
         data: swapData.data,
-        value: swapData.value
+        value: swapData.nativeValue
       });
     }
   };
