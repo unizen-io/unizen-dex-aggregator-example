@@ -1,4 +1,9 @@
-import { Token } from '@uniswap/sdk-core';
+import {
+  Currency,
+  Token
+} from '@uniswap/sdk-core';
+
+import { nativeOnChain } from 'utils/hooks/web3/use-native-currency';
 
 enum SupportedChainID {
     EthereumMainnet = 1,
@@ -10,6 +15,10 @@ enum SupportedChainID {
     Arbitrum = 42161,
     Base = 8453
   }
+  enum NonEVMSupportedChainID {
+    BTC = -3980891822
+}
+
 const NATIVE_CURRENCY: { [key in SupportedChainID]:
     {name: string; symbol: string; };
 } = {
@@ -238,14 +247,32 @@ const STABLE_TOKENS: { [key in SupportedChainID]: Token[]; } = {
     )
   ]
 };
+
+const THORCHAIN_SUPPORTED_NETWORKS = [
+  SupportedChainID.EthereumMainnet,
+  SupportedChainID.Avalanche
+];
+const THORCHAIN_SUPPORTED_CURRENCIES: Currency[] = [
+  nativeOnChain(SupportedChainID.EthereumMainnet),
+  nativeOnChain(SupportedChainID.Avalanche)
+];
 enum CrossChainTradeProtocol {
     CROSS_CHAIN_STARGATE = 'CROSS_CHAIN_STARGATE',
     CROSS_CHAIN_CELER = 'CROSS_CHAIN_CELER',
+    CROSS_CHAIN_THORCHAIN = 'CROSS_CHAIN_THORCHAIN',
+}
+enum BTCTradeType {
+    BTC_TO_NATIVE = 'BTC_TO_NATIVE',
+    NATIVE_TO_BTC = 'NATIVE_TO_BTC',
 }
 export {
   WRAPPED_NATIVE_CURRENCY,
   STABLE_TOKENS,
   NATIVE_CURRENCY,
   SupportedChainID,
-  CrossChainTradeProtocol
+  CrossChainTradeProtocol,
+  NonEVMSupportedChainID,
+  THORCHAIN_SUPPORTED_NETWORKS,
+  THORCHAIN_SUPPORTED_CURRENCIES,
+  BTCTradeType
 };
