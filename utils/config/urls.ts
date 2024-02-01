@@ -92,14 +92,17 @@ function getCrossSwapURL(chainId: SupportedChainID) {
 function getTransactionDataCross(chainId: SupportedChainID) {
   return `${API_UNIZEN_IO_LINK}/trade/v1/${chainId}/quote/cross-data`;
 }
-
+function getBTCInboundAddresses() {
+  return `${API_UNIZEN_IO_LINK}/trade/info/thorchain-inbound-address`;
+}
 export {
   getSingleQuoteURL,
   getSingleSwapURL,
   getCrossQuoteURL,
   getCrossQuoteSelectURL,
   getCrossSwapURL,
-  getTransactionDataCross
+  getTransactionDataCross,
+  getBTCInboundAddresses
 
 };
 

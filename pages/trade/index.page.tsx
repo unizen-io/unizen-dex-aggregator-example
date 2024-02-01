@@ -12,7 +12,13 @@ const Trade = () => {
   ] = React.useState<'evm' | 'btc'>('evm');
 
   return (
-    <>
+    <div
+      className={clsx(
+        'flex',
+        'flex-col',
+        'items-center',
+        'justify-center'
+      )}>
       <Ariakit.TabProvider defaultSelectedId={mode}>
         <Ariakit.TabList
           className='tab-list'
@@ -67,7 +73,7 @@ const Trade = () => {
           <TradeBTC />
         </Ariakit.TabPanel>
       </Ariakit.TabProvider>
-    </>
+    </div>
   );
 };
 

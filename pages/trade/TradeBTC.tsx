@@ -20,6 +20,7 @@ import {
 } from 'utils/config/token';
 import { CrossChainQuoteCallData } from 'utils/config/type';
 import {
+  getBTCInboundAddresses,
   getCrossQuoteURL,
   getCrossSwapURL
 } from 'utils/config/urls';
@@ -168,6 +169,17 @@ const TradeBTC = () => {
       }
     }
   };
+  const handleFetchInboundAddress = async () => {
+    const url = getBTCInboundAddresses();
+
+    const response = await fetch(
+      url, {
+        method: 'GET',
+        headers: { 'x-api-key': process.env.NEXT_PUBLIC_X_API_KEY } as any
+      });
+    const data = await response.json();
+    return data;
+  };
   const onCurrencyInInput = (amount: string | undefined) => {
     setCurrencyAmountIn(amount);
     setCurrencyAmountOut(undefined);
@@ -186,6 +198,7 @@ const TradeBTC = () => {
     setCurrencyAmountIn(undefined);
     setCurrencyAmountOut(undefined);
   };
+
   const handleConfirmTrade = async () => {
     if (currencyIn.chainId) {
       const url = getCrossSwapURL(currencyIn.chainId);
@@ -216,8 +229,15 @@ const TradeBTC = () => {
       return data;
     }
   };
-  const handleSendTransaction = () => {
+  const handleSendTransaction = async () => {
+    const inboundAddress = await handleFetchInboundAddress();
+
     if (quote?.transactionData.tradeType === BTCTradeType.BTC_TO_NATIVE) {
+      const btcInboundAddress = inboundAddress.find((item: any) => item.chain === NonEVMSupportedChainID.BTC);
+
+      if (swapData.data.params[0].recipient.toLowerCase() !== btcInboundAddress.address.toLowerCase()) {
+        throw new Error('Invalid inbound address, please fetch latest quote');
+      }
       (window as any).xfi.bitcoin?.request({ ...swapData.data },
         (error: any) => {
           if (error) {
@@ -226,6 +246,11 @@ const TradeBTC = () => {
         });
     }
     if (quote?.transactionData.tradeType === BTCTradeType.NATIVE_TO_BTC) {
+      const currentInboundAddress = inboundAddress.find((item: any) => item.chain === currencyIn.chainId);
+
+      if (swapData.to.toLowerCase() !== currentInboundAddress.address.toLowerCase()) {
+        throw new Error('Invalid inbound address, please fetch latest quote');
+      }
       provider?.getSigner(account)?.sendTransaction({
         to: swapData.to,
         data: swapData.data,
