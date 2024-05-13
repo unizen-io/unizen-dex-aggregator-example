@@ -1,7 +1,4 @@
-import {
-  CrossChainTradeProtocol,
-  SupportedChainID
-} from './token';
+import { SupportedChainID } from './token';
 
 interface CrossQuoteAPIProps {
     fromTokenAddress: string;
@@ -66,32 +63,10 @@ function getCrossQuoteURL({
   return `${API_UNIZEN_IO_LINK}/trade/v1/${sourceChainId}/quote/cross?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&deadline=${deadline}&destinationChainId=${destinationChainId}&sender=${sender}&isExactOut=${isExactOut}&slippage=${slippage}&uuid=${uuid}&receiver=${receiver}`;
 }
 
-function getCrossQuoteSelectURL({
-  fromTokenAddress,
-  toTokenAddress,
-  amount,
-  deadline,
-  sourceChainId,
-  destinationChainId,
-  sender,
-  isExactOut,
-  slippage,
-  uuid,
-  stableAmount,
-  tradeProtocol
-}: CrossQuoteAPIProps & {
-      stableAmount: string;
-      tradeProtocol: CrossChainTradeProtocol;
-    }) {
-  // eslint-disable-next-line max-len
-  return `${API_UNIZEN_IO_LINK}/trade/v1/${sourceChainId}/quote/cross-select?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&deadline=${deadline}&destinationChainId=${destinationChainId}&sender=${sender}&isExactOut=${isExactOut}&slippage=${slippage}&uuid=${uuid}&stableAmount=${stableAmount}&tradeProtocol=${tradeProtocol}`;
-}
 function getCrossSwapURL(chainId: SupportedChainID) {
   return `${API_UNIZEN_IO_LINK}/trade/v1/${chainId}/swap/cross`;
 }
-function getTransactionDataCross(chainId: SupportedChainID) {
-  return `${API_UNIZEN_IO_LINK}/trade/v1/${chainId}/quote/cross-data`;
-}
+
 function getBTCInboundAddresses() {
   return `${API_UNIZEN_IO_LINK}/trade/info/thorchain-inbound-address`;
 }
@@ -99,9 +74,7 @@ export {
   getSingleQuoteURL,
   getSingleSwapURL,
   getCrossQuoteURL,
-  getCrossQuoteSelectURL,
   getCrossSwapURL,
-  getTransactionDataCross,
   getBTCInboundAddresses
 
 };

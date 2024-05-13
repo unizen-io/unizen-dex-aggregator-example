@@ -20,7 +20,7 @@ interface Props {
     currencyOut: Currency | undefined;
 }
 
-const BasicVersion = ({
+const ConfirmTrade = ({
   quote,
   isExactOut,
   currencyIn,
@@ -80,7 +80,7 @@ const BasicVersion = ({
   };
 
   const handleSendTransaction = async () => {
-    const contractAddress = UNIZEN_CONTRACT_ADDRESS[swapData.contractVersion as 'v1' | 'v2'][chainId as SupportedChainID];
+    const contractAddress = UNIZEN_CONTRACT_ADDRESS[swapData.contractVersion as 'v1' | 'v2' | 'v3'][chainId as SupportedChainID];
 
     provider?.getSigner().sendTransaction({
       from: account,
@@ -146,4 +146,4 @@ const BasicVersion = ({
   );
 };
 
-export default BasicVersion;
+export default ConfirmTrade;

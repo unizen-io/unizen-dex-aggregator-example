@@ -2021,10 +2021,10 @@
     tiny-invariant "^1.1.0"
     toformat "^2.0.0"
 
-"@unizen-io/unizen-contract-addresses@^0.0.10":
-  version "0.0.10"
-  resolved "https://registry.npmjs.org/@unizen-io/unizen-contract-addresses/-/unizen-contract-addresses-0.0.10.tgz#681e2306a6a4ef96a1004777d75840c959004ce6"
-  integrity sha512-R6YMsJdQeTQ3Dd2HknzUuHgjt2eDpczpyBwXB+PHfe0DZu4BeRBX+/k6Z+X84pjyuhRue5EAD0PWbYrn5RieNg==
+"@unizen-io/unizen-contract-addresses@^0.0.14":
+  version "0.0.14"
+  resolved "https://registry.npmjs.org/@unizen-io/unizen-contract-addresses/-/unizen-contract-addresses-0.0.14.tgz#48a817d836c78e1efd830b70096903991705677e"
+  integrity sha512-U85TyrgviZvXqjxsBoecwBDbHpi3aISCeLpNRqn/BKc+p8Y718sUyXWK44Vo1YkdcFzqC8j1u6yDXL+5iB1yGA==
 
 "@web3-react/core@^8.2.0":
   version "8.2.0"

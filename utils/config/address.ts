@@ -3,7 +3,7 @@ import PROD_CONTRACT_ADDRESS from '@unizen-io/unizen-contract-addresses/producti
 import { SupportedChainID } from './token';
 
 const UNIZEN_CONTRACT_ADDRESS: {
-    [key in 'v1' | 'v2']: {
+    [key in 'v1' | 'v2' | 'v3']: {
         [key in SupportedChainID]: string;
     }
 } = {
@@ -26,6 +26,16 @@ const UNIZEN_CONTRACT_ADDRESS: {
     [SupportedChainID.Arbitrum]: PROD_CONTRACT_ADDRESS.v2.arbitrum,
     [SupportedChainID.Optimism]: PROD_CONTRACT_ADDRESS.v2.optimism,
     [SupportedChainID.Base]: ''
+  },
+  v3: {
+    [SupportedChainID.EthereumMainnet]: PROD_CONTRACT_ADDRESS.v3.ethereum,
+    [SupportedChainID.BSCMainnet]: PROD_CONTRACT_ADDRESS.v3.bsc,
+    [SupportedChainID.PolygonMainnet]: PROD_CONTRACT_ADDRESS.v3.polygon,
+    [SupportedChainID.Fantom]: '',
+    [SupportedChainID.Avalanche]: PROD_CONTRACT_ADDRESS.v3.avax,
+    [SupportedChainID.Arbitrum]: PROD_CONTRACT_ADDRESS.v3.arbitrum,
+    [SupportedChainID.Optimism]: PROD_CONTRACT_ADDRESS.v3.optimism,
+    [SupportedChainID.Base]: PROD_CONTRACT_ADDRESS.v3.base
   }
 };
 
