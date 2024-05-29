@@ -12,11 +12,11 @@ import { useWeb3React } from '@web3-react/core';
 import CurrencyInputPanel from 'components/CurrencyInputPanel';
 import Wallet from 'components/Wallet';
 import {
-  BTCTradeType,
   NonEVMSupportedChainID,
   SupportedChainID,
   THORCHAIN_SUPPORTED_CURRENCIES,
-  THORCHAIN_SUPPORTED_NETWORKS
+  THORCHAIN_SUPPORTED_NETWORKS,
+  UTXOSupportedChainID
 } from 'utils/config/token';
 import { CrossChainQuoteCallData } from 'utils/config/type';
 import {
@@ -24,6 +24,7 @@ import {
   getCrossQuoteURL,
   getCrossSwapURL
 } from 'utils/config/urls';
+import { getIsUTXOSupportedChainID } from 'utils/helpers/chains/getIsUTXOSupportedChainID';
 
 function getIsXDeFiBitcoin(): boolean {
   return (
@@ -40,24 +41,18 @@ const getIsValidThorchainChainID = ({
       destinationChainId: SupportedChainID | NonEVMSupportedChainID;
   }): {
       isBTCTrade: boolean;
-      btcTradeType?: BTCTradeType;
+      isBTCToNative?: boolean;
+      isNativeToBTC?: boolean;
   } => {
-  const isBTCToNative = sourceChainId === NonEVMSupportedChainID.BTC && destinationChainId !== NonEVMSupportedChainID.BTC &&
+  const isBTCToNative = getIsUTXOSupportedChainID(sourceChainId) && !getIsUTXOSupportedChainID(destinationChainId) &&
           THORCHAIN_SUPPORTED_NETWORKS.includes(destinationChainId as SupportedChainID);
-  const isNativeToBTC = sourceChainId !== NonEVMSupportedChainID.BTC && destinationChainId === NonEVMSupportedChainID.BTC &&
+  const isNativeToBTC = !getIsUTXOSupportedChainID(sourceChainId) && getIsUTXOSupportedChainID(destinationChainId) &&
           THORCHAIN_SUPPORTED_NETWORKS.includes(sourceChainId as SupportedChainID);
 
-  const isBTCTrade = isBTCToNative || isNativeToBTC;
-  if (!isBTCTrade) {
-    return {
-      isBTCTrade,
-      btcTradeType: undefined
-    };
-  }
-  const btcTradeType = isBTCToNative ? BTCTradeType.BTC_TO_NATIVE : BTCTradeType.NATIVE_TO_BTC;
   return {
     isBTCTrade: true,
-    btcTradeType
+    isBTCToNative,
+    isNativeToBTC
   };
 };
 
@@ -128,7 +123,7 @@ const TradeBTC = () => {
 
   const handleFetchQuote = async () => {
     setIsFetchingQuote(true);
-    const { btcTradeType } = getIsValidThorchainChainID({
+    const { isBTCToNative, isNativeToBTC } = getIsValidThorchainChainID({
       sourceChainId: currencyIn.chainId,
       destinationChainId: currencyOut.chainId
     });
@@ -141,8 +136,8 @@ const TradeBTC = () => {
         toTokenAddress: AddressZero,
         sourceChainId: currencyIn.chainId,
         destinationChainId: currencyOut?.chainId,
-        sender: btcTradeType === BTCTradeType.BTC_TO_NATIVE ? btcAddress : account,
-        receiver: btcTradeType === BTCTradeType.BTC_TO_NATIVE ? account : btcAddress,
+        sender: isBTCToNative ? btcAddress : account,
+        receiver: isNativeToBTC ? account : btcAddress,
         amount: amount,
         isExactOut: false
       };
@@ -237,7 +232,9 @@ const TradeBTC = () => {
     if (currentTimestamp > expiry) {
       throw new Error('Expired transaction');
     }
-    if (quote?.transactionData.tradeType === BTCTradeType.BTC_TO_NATIVE) {
+    const isUTXOSourceChain = Object.values(UTXOSupportedChainID).includes(quote.originalCrossChainCalls.sourceChainId as any);
+
+    if (isUTXOSourceChain) {
       const btcInboundAddress = inboundAddress.find((item: any) => item.chain === NonEVMSupportedChainID.BTC);
 
       if (swapData.data.params[0].recipient.toLowerCase() !== btcInboundAddress.address.toLowerCase()) {
@@ -250,7 +247,7 @@ const TradeBTC = () => {
           }
         });
     }
-    if (quote?.transactionData.tradeType === BTCTradeType.NATIVE_TO_BTC) {
+    if (!isUTXOSourceChain) {
       const currentInboundAddress = inboundAddress.find((item: any) => item.chain === currencyIn.chainId);
 
       if (swapData.to.toLowerCase() !== currentInboundAddress.address.toLowerCase()) {
