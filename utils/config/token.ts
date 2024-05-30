@@ -17,9 +17,6 @@ enum SupportedChainID {
   Arbitrum = 42161,
   Base = 8453,
 }
-enum NonEVMSupportedChainID {
-  BTC = -3980891822,
-}
 
 enum UTXOSupportedChainID {
   BTC = -3980891822,
@@ -28,7 +25,7 @@ enum UTXOSupportedChainID {
   DOGE = -2857711499,
 }
 
-type AllSupportedChainIds = SupportedChainID | UTXOSupportedChainID | NonEVMSupportedChainID;
+type AllSupportedChainIds = SupportedChainID | UTXOSupportedChainID;
 
 enum UTXOTokenSymbol {
   BTC = 'BTC',
@@ -316,7 +313,6 @@ export {
   NATIVE_CURRENCY,
   SupportedChainID,
   CrossChainTradeProtocol,
-  NonEVMSupportedChainID,
   THORCHAIN_SUPPORTED_NETWORKS,
   THORCHAIN_SUPPORTED_CURRENCIES,
   BTCTradeType,

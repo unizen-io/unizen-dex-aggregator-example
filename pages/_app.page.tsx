@@ -7,6 +7,7 @@ import {
 } from '@web3-react/core';
 import { Connector } from '@web3-react/types';
 
+import { XDefiWalletProvider } from 'utils/context/XDefiWalletContext';
 import {
   Connection,
   CONNECTIONS
@@ -42,7 +43,9 @@ const MyApp = ({
         <title>Unizen DEX Aggregator Example Project</title>
       </Head>
       <Web3Provider>
-        <Component {...pageProps} />
+        <XDefiWalletProvider>
+          <Component {...pageProps} />
+        </XDefiWalletProvider>
       </Web3Provider>
     </>
   );

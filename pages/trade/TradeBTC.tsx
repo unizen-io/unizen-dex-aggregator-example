@@ -12,7 +12,7 @@ import { useWeb3React } from '@web3-react/core';
 import CurrencyInputPanel from 'components/CurrencyInputPanel';
 import Wallet from 'components/Wallet';
 import {
-  NonEVMSupportedChainID,
+  AllSupportedChainIds,
   SupportedChainID,
   THORCHAIN_SUPPORTED_CURRENCIES,
   THORCHAIN_SUPPORTED_NETWORKS,
@@ -25,6 +25,7 @@ import {
   getCrossSwapURL
 } from 'utils/config/urls';
 import { getIsUTXOSupportedChainID } from 'utils/helpers/chains/getIsUTXOSupportedChainID';
+import { useXDefiWalletStore } from 'utils/hooks/useXDefiWalletStore';
 
 function getIsXDeFiBitcoin(): boolean {
   return (
@@ -37,8 +38,8 @@ const getIsValidThorchainChainID = ({
   sourceChainId,
   destinationChainId
 }: {
-      sourceChainId: SupportedChainID | NonEVMSupportedChainID;
-      destinationChainId: SupportedChainID | NonEVMSupportedChainID;
+      sourceChainId: AllSupportedChainIds;
+      destinationChainId: AllSupportedChainIds;
   }): {
       isBTCTrade: boolean;
       isBTCToNative?: boolean;
@@ -57,7 +58,7 @@ const getIsValidThorchainChainID = ({
 };
 
 const BTC_CURRENCY = {
-  chainId: NonEVMSupportedChainID.BTC,
+  chainId: UTXOSupportedChainID.BTC,
   decimals: 8,
   symbol: 'BTC',
   name: 'Bitcoin',
@@ -70,7 +71,7 @@ const BTC_TRADE_CURRENCIES = [
 ];
 const TradeBTC = () => {
   const { account, provider } = useWeb3React();
-
+  const activeXDefiWallet = useXDefiWalletStore();
   const [
     btcAddress,
     setBtcAddress
@@ -235,22 +236,28 @@ const TradeBTC = () => {
     const isUTXOSourceChain = Object.values(UTXOSupportedChainID).includes(quote.originalCrossChainCalls.sourceChainId as any);
 
     if (isUTXOSourceChain) {
-      const btcInboundAddress = inboundAddress.find((item: any) => item.chain === NonEVMSupportedChainID.BTC);
+      const btcInboundAddress = inboundAddress?.find(
+        (item: any) => item.chain === quote.originalCrossChainCalls?.sourceChainId as any
+      )?.address;
 
-      if (swapData.data.params[0].recipient.toLowerCase() !== btcInboundAddress.address.toLowerCase()) {
+      if (swapData.data.params[0].recipient.toLowerCase() !== btcInboundAddress.toLowerCase()) {
         throw new Error('Invalid inbound address, please fetch latest quote');
       }
-      (window as any).xfi.bitcoin?.request({ ...swapData.data },
+
+      activeXDefiWallet.connector?.request({ ...swapData.data },
         (error: any) => {
           if (error) {
             console.error(error);
           }
-        });
+        }
+      );
     }
     if (!isUTXOSourceChain) {
-      const currentInboundAddress = inboundAddress.find((item: any) => item.chain === currencyIn.chainId);
+      const currentInboundAddress = inboundAddress?.find(
+        (item: any) => item.chain === quote.originalCrossChainCalls?.sourceChainId as any
+      )?.address;
 
-      if (swapData.to.toLowerCase() !== currentInboundAddress.address.toLowerCase()) {
+      if (swapData.to.toLowerCase() !== currentInboundAddress.toLowerCase()) {
         throw new Error('Invalid inbound address, please fetch latest quote');
       }
       provider?.getSigner(account)?.sendTransaction({
