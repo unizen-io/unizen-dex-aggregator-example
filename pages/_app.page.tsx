@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import type { AppProps } from 'next/app';
+import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import {
   Web3ReactHooks,
@@ -7,12 +8,16 @@ import {
 } from '@web3-react/core';
 import { Connector } from '@web3-react/types';
 
-import { XDefiWalletProvider } from 'utils/context/XDefiWalletContext';
 import {
   Connection,
   CONNECTIONS
 } from 'utils/helpers/web3/connectors';
 import 'styles/global.css';
+
+const XDefiWalletProvider = dynamic(
+  () => import('../utils/context/XDefiWalletContext'),
+  { ssr: false }
+);
 
 function Web3Provider({ children }: { children: ReactNode; }) {
   const connections = CONNECTIONS;

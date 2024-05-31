@@ -167,6 +167,5 @@ const ErrorBoundaryWrappedXDefiWalletProvider = withErrorBoundary(XDefiWalletPro
   }
 });
 
-export default useXDefiWallet;
-
-export { ErrorBoundaryWrappedXDefiWalletProvider as XDefiWalletProvider };
+export { useXDefiWallet };
+export default ErrorBoundaryWrappedXDefiWalletProvider;
