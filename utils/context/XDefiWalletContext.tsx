@@ -32,10 +32,10 @@ const XDefiWalletContext = React.createContext<
 >(undefined);
 
 const mapChainIdToConnector = {
-  [UTXOSupportedChainID.BTC]: (window as any).xfi?.bitcoin,
-  [UTXOSupportedChainID.DOGE]: (window as any).xfi?.dogecoin,
-  [UTXOSupportedChainID.LTC]: (window as any).xfi?.litecoin,
-  [UTXOSupportedChainID.BCH]: (window as any).xfi?.bitcoincash
+  [UTXOSupportedChainID.BTC]: typeof window !== 'undefined' && (window as any).xfi?.bitcoin,
+  [UTXOSupportedChainID.DOGE]: typeof window !== 'undefined' && (window as any).xfi?.dogecoin,
+  [UTXOSupportedChainID.LTC]: typeof window !== 'undefined' && (window as any).xfi?.litecoin,
+  [UTXOSupportedChainID.BCH]: typeof window !== 'undefined' && (window as any).xfi?.bitcoincash
 };
 
 function XDefiWalletProvider({ children }: { children: React.ReactNode; }) {
