@@ -24,11 +24,19 @@ interface XDefiWalletInterface {
     activeXDefiWallet: ActiveXDefiWallet;
     isXDeFi: boolean;
     handleXDefiActive: (chainId: UTXOSupportedChainID) => void;
+    handleConnectAll: () => void;
     allAccountsByChainId: {[key in UTXOSupportedChainID]: string | undefined};
 }
 const XDefiWalletContext = React.createContext<
     XDefiWalletInterface | undefined
 >(undefined);
+
+const mapChainIdToConnector = {
+  [UTXOSupportedChainID.BTC]: (window as any).xfi?.bitcoin,
+  [UTXOSupportedChainID.DOGE]: (window as any).xfi?.dogecoin,
+  [UTXOSupportedChainID.LTC]: (window as any).xfi?.litecoin,
+  [UTXOSupportedChainID.BCH]: (window as any).xfi?.bitcoincash
+};
 
 function XDefiWalletProvider({ children }: { children: React.ReactNode; }) {
   const {
@@ -49,12 +57,6 @@ function XDefiWalletProvider({ children }: { children: React.ReactNode; }) {
     setAllAccountsByChainId
   } = useXDefiWalletStore();
 
-  const mapChainIdToConnector = {
-    [UTXOSupportedChainID.BTC]: (window as any).xfi?.bitcoin,
-    [UTXOSupportedChainID.DOGE]: (window as any).xfi?.dogecoin,
-    [UTXOSupportedChainID.LTC]: (window as any).xfi?.litecoin,
-    [UTXOSupportedChainID.BCH]: (window as any).xfi?.bitcoincash
-  };
   const isXDeFi = getIsXDeFi();
   const handleActive = async (chainId: UTXOSupportedChainID) => {
     const connector = mapChainIdToConnector[chainId];
@@ -80,22 +82,20 @@ function XDefiWalletProvider({ children }: { children: React.ReactNode; }) {
     }
   };
 
-  const handleConnectAll = async () => {
-    // for (const chainId of allChainIds) {
-    //   const connector = mapChainIdToConnector[chainId];
-    //   if (connector) {
-    //     handleActive(chainId);
-    //   }
-    // }
+  const handleConnectAll = React.useCallback(async () => {
     handleActive(UTXOSupportedChainID.BTC);
     if (active) {
       handleActive(UTXOSupportedChainID.DOGE);
       handleActive(UTXOSupportedChainID.LTC);
+      handleActive(UTXOSupportedChainID.BCH);
     }
-  };
+  }, [active]);
+
   React.useEffect(() => {
     if (active) {
       handleActive(UTXOSupportedChainID.DOGE);
+      handleActive(UTXOSupportedChainID.LTC);
+      handleActive(UTXOSupportedChainID.BCH);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
@@ -130,7 +130,8 @@ function XDefiWalletProvider({ children }: { children: React.ReactNode; }) {
       },
       isXDeFi,
       allAccountsByChainId,
-      handleXDefiActive
+      handleXDefiActive,
+      handleConnectAll
     }),
     [
       account,
@@ -141,6 +142,7 @@ function XDefiWalletProvider({ children }: { children: React.ReactNode; }) {
       chainId,
       handleXDefiActive,
       allAccountsByChainId,
+      handleConnectAll,
       isXDeFi
     ]
   );
@@ -167,5 +169,8 @@ const ErrorBoundaryWrappedXDefiWalletProvider = withErrorBoundary(XDefiWalletPro
   }
 });
 
-export { useXDefiWallet };
+export {
+  useXDefiWallet,
+  mapChainIdToConnector
+};
 export default ErrorBoundaryWrappedXDefiWalletProvider;

@@ -20,9 +20,9 @@ enum SupportedChainID {
 
 enum UTXOSupportedChainID {
   BTC = -3980891822,
-  BCH = 10000,
-  LTC = -33463083,
-  DOGE = -2857711499,
+    BCH = -174457306,
+    LTC = -33463083,
+    DOGE = -3143381382,
 }
 
 type AllSupportedChainIds = SupportedChainID | UTXOSupportedChainID;
@@ -286,26 +286,32 @@ const UTXO_TOKENS: {
     8,
     UTXOTokenSymbol.DOGE,
     'Doge'
+  ),
+  [UTXOSupportedChainID.BCH]: new Token(
+    UTXOSupportedChainID.BCH,
+    zeroAddress,
+    8,
+    UTXOTokenSymbol.BCH,
+    'Bitcoin Cash'
   )
 };
 
 const THORCHAIN_SUPPORTED_NETWORKS = [
   SupportedChainID.EthereumMainnet,
-  SupportedChainID.Avalanche
+  SupportedChainID.Avalanche,
+  SupportedChainID.BSCMainnet
 ];
 const THORCHAIN_SUPPORTED_CURRENCIES: Currency[] = [
   nativeOnChain(SupportedChainID.EthereumMainnet),
-  nativeOnChain(SupportedChainID.Avalanche)
+  nativeOnChain(SupportedChainID.Avalanche),
+  nativeOnChain(SupportedChainID.BSCMainnet)
 ];
 enum CrossChainTradeProtocol {
   CROSS_CHAIN_STARGATE = 'CROSS_CHAIN_STARGATE',
   CROSS_CHAIN_CELER = 'CROSS_CHAIN_CELER',
   CROSS_CHAIN_THORCHAIN = 'CROSS_CHAIN_THORCHAIN',
 }
-enum BTCTradeType {
-  BTC_TO_NATIVE = 'BTC_TO_NATIVE',
-  NATIVE_TO_BTC = 'NATIVE_TO_BTC',
-}
+
 export {
   WRAPPED_NATIVE_CURRENCY,
   STABLE_TOKENS,
@@ -315,7 +321,6 @@ export {
   CrossChainTradeProtocol,
   THORCHAIN_SUPPORTED_NETWORKS,
   THORCHAIN_SUPPORTED_CURRENCIES,
-  BTCTradeType,
   UTXOSupportedChainID
 };
 

@@ -70,13 +70,16 @@ function getCrossSwapURL(chainId: SupportedChainID) {
 function getBTCInboundAddresses() {
   return `${API_UNIZEN_IO_LINK}/trade/info/thorchain-inbound-address`;
 }
+function getThorChainPools() {
+  return `${API_UNIZEN_IO_LINK}/trade/info/thorchain-pools`;
+}
 export {
   getSingleQuoteURL,
   getSingleSwapURL,
   getCrossQuoteURL,
   getCrossSwapURL,
-  getBTCInboundAddresses
-
+  getBTCInboundAddresses,
+  getThorChainPools
 };
 
 export type { CrossQuoteAPIProps };

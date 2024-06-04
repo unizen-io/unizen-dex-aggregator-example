@@ -12,10 +12,8 @@ import { useWeb3React } from '@web3-react/core';
 import CurrencyInputPanel from 'components/CurrencyInputPanel';
 import Wallet from 'components/Wallet';
 import {
-  AllSupportedChainIds,
-  SupportedChainID,
   THORCHAIN_SUPPORTED_CURRENCIES,
-  THORCHAIN_SUPPORTED_NETWORKS,
+  UTXO_TOKENS,
   UTXOSupportedChainID
 } from 'utils/config/token';
 import { CrossChainQuoteCallData } from 'utils/config/type';
@@ -24,58 +22,19 @@ import {
   getCrossQuoteURL,
   getCrossSwapURL
 } from 'utils/config/urls';
-import { getIsUTXOSupportedChainID } from 'utils/helpers/chains/getIsUTXOSupportedChainID';
-import { useXDefiWalletStore } from 'utils/hooks/useXDefiWalletStore';
+import {
+  mapChainIdToConnector,
+  useXDefiWallet
+} from 'utils/context/XDefiWalletContext';
 
-function getIsXDeFiBitcoin(): boolean {
-  return (
-    typeof window !== 'undefined' &&
-        (window as any).xfi &&
-        (window as any).xfi.bitcoin
-  ) ?? false;
-}
-const getIsValidThorchainChainID = ({
-  sourceChainId,
-  destinationChainId
-}: {
-      sourceChainId: AllSupportedChainIds;
-      destinationChainId: AllSupportedChainIds;
-  }): {
-      isBTCTrade: boolean;
-      isBTCToNative?: boolean;
-      isNativeToBTC?: boolean;
-  } => {
-  const isBTCToNative = getIsUTXOSupportedChainID(sourceChainId) && !getIsUTXOSupportedChainID(destinationChainId) &&
-          THORCHAIN_SUPPORTED_NETWORKS.includes(destinationChainId as SupportedChainID);
-  const isNativeToBTC = !getIsUTXOSupportedChainID(sourceChainId) && getIsUTXOSupportedChainID(destinationChainId) &&
-          THORCHAIN_SUPPORTED_NETWORKS.includes(sourceChainId as SupportedChainID);
-
-  return {
-    isBTCTrade: true,
-    isBTCToNative,
-    isNativeToBTC
-  };
-};
-
-const BTC_CURRENCY = {
-  chainId: UTXOSupportedChainID.BTC,
-  decimals: 8,
-  symbol: 'BTC',
-  name: 'Bitcoin',
-  address: AddressZero
-} as Currency;
-
-const BTC_TRADE_CURRENCIES = [
-  BTC_CURRENCY,
+const UTXO_TRADE_CURRENCIES = [
+  ...(Object.values(UTXO_TOKENS) as Currency[]),
   ...THORCHAIN_SUPPORTED_CURRENCIES
 ];
-const TradeBTC = () => {
+const TradeUTXO = () => {
   const { account, provider } = useWeb3React();
-  const activeXDefiWallet = useXDefiWalletStore();
-  const [
-    btcAddress,
-    setBtcAddress
-  ] = React.useState<string>();
+  const { allAccountsByChainId, handleConnectAll, activeXDefiWallet } = useXDefiWallet();
+
   const [
     currencyIn,
     setCurrencyIn
@@ -83,7 +42,7 @@ const TradeBTC = () => {
   const [
     currencyOut,
     setCurrencyOut
-  ] = React.useState(BTC_CURRENCY);
+  ] = React.useState(UTXO_TRADE_CURRENCIES[0]);
   const [
     currencyAmountIn,
     setCurrencyAmountIn
@@ -106,39 +65,25 @@ const TradeBTC = () => {
     setSwapData
   ] = React.useState<any>();
 
-  const handleActive = () => {
-    if (getIsXDeFiBitcoin()) {
-      (window as any).xfi.bitcoin?.request(
-        { method: 'request_accounts', params: [] },
-        (error: Error | undefined, accounts: string[]) => {
-        //   setBtcConnector((window as any).xfi.bitcoin);
-          if (error) {
-            return;
-          }
-          if (accounts) {
-            setBtcAddress(accounts[0]);
-          }
-        });
-    }
-  };
+  const isUTXOSourceChain = currencyIn?.chainId ? Object.values(UTXOSupportedChainID).includes(currencyIn.chainId) : false;
+  const isUTXODestinationChain = currencyOut?.chainId ?
+    Object.values(UTXOSupportedChainID).includes(currencyOut?.chainId) :
+    false;
 
   const handleFetchQuote = async () => {
     setIsFetchingQuote(true);
-    const { isBTCToNative, isNativeToBTC } = getIsValidThorchainChainID({
-      sourceChainId: currencyIn.chainId,
-      destinationChainId: currencyOut.chainId
-    });
+
     const amount = parseUnits(currencyAmountIn || '0', currencyIn?.decimals).toString();
 
     let crossChainParams: any;
-    if (amount && currencyOut) {
+    if (amount && currencyOut && currencyIn) {
       crossChainParams = {
         fromTokenAddress: AddressZero,
         toTokenAddress: AddressZero,
         sourceChainId: currencyIn.chainId,
         destinationChainId: currencyOut?.chainId,
-        sender: isBTCToNative ? btcAddress : account,
-        receiver: isNativeToBTC ? account : btcAddress,
+        sender: isUTXOSourceChain ? allAccountsByChainId[currencyIn.chainId as UTXOSupportedChainID] : account,
+        receiver: isUTXODestinationChain ? allAccountsByChainId[currencyOut.chainId as UTXOSupportedChainID] : account,
         amount: amount,
         isExactOut: false
       };
@@ -202,7 +147,7 @@ const TradeBTC = () => {
       const params = {
         transactionData: quote?.transactionData,
         nativeValue: quote?.nativeValue,
-        account: btcAddress
+        account: isUTXOSourceChain ? allAccountsByChainId[currencyIn.chainId as UTXOSupportedChainID] : account
       };
 
       const data = await fetch(url, {
@@ -227,24 +172,26 @@ const TradeBTC = () => {
   };
   const handleSendTransaction = async () => {
     const inboundAddress = await handleFetchInboundAddress();
+    const sourceChainId = quote.srcTrade?.tokenFrom?.chainId;
+    const currentChainInboundAddress = inboundAddress?.find(
+      (address: { chain: any; }) => address.chain === sourceChainId as any
+    )?.address;
+
     const expiry = quote.transactionData.expiry;
     const currentTimestamp = Math.floor(new Date().getTime() / 1000);
 
     if (currentTimestamp > expiry) {
       throw new Error('Expired transaction');
     }
-    const isUTXOSourceChain = Object.values(UTXOSupportedChainID).includes(quote.originalCrossChainCalls.sourceChainId as any);
+    const isUTXOSourceChain = Object.values(UTXOSupportedChainID).includes(sourceChainId as any);
 
     if (isUTXOSourceChain) {
-      const btcInboundAddress = inboundAddress?.find(
-        (item: any) => item.chain === quote.originalCrossChainCalls?.sourceChainId as any
-      )?.address;
-
-      if (swapData.data.params[0].recipient.toLowerCase() !== btcInboundAddress.toLowerCase()) {
+      if (swapData.data.params[0].recipient.toLowerCase() !== currentChainInboundAddress.toLowerCase()) {
         throw new Error('Invalid inbound address, please fetch latest quote');
       }
+      const connector = mapChainIdToConnector[sourceChainId as UTXOSupportedChainID];
 
-      activeXDefiWallet.connector?.request({ ...swapData.data },
+      connector?.request({ ...swapData.data },
         (error: any) => {
           if (error) {
             console.error(error);
@@ -253,11 +200,7 @@ const TradeBTC = () => {
       );
     }
     if (!isUTXOSourceChain) {
-      const currentInboundAddress = inboundAddress?.find(
-        (item: any) => item.chain === quote.originalCrossChainCalls?.sourceChainId as any
-      )?.address;
-
-      if (swapData.to.toLowerCase() !== currentInboundAddress.toLowerCase()) {
+      if (swapData.to.toLowerCase() !== currentChainInboundAddress.toLowerCase()) {
         throw new Error('Invalid inbound address, please fetch latest quote');
       }
       provider?.getSigner(account)?.sendTransaction({
@@ -291,10 +234,14 @@ const TradeBTC = () => {
             style={{ width: 200 }}
             className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
             // eslint-disable-next-line @typescript-eslint/no-empty-function
-            onClick={handleActive}>
-            {btcAddress ? 'Disconnect' : 'Connect XDeFi Bitcoin'}
+            onClick={handleConnectAll}>
+            {activeXDefiWallet.active ? 'Disconnect' : 'Connect XDeFi Bitcoin'}
           </button>
-          <span>{btcAddress}</span>
+          {Object.keys(allAccountsByChainId).map((chain, index) => (
+            <div key={index}>
+              {chain} : {allAccountsByChainId[chain as unknown as UTXOSupportedChainID]}
+            </div>
+          ))}
         </div>
         <div
           className={clsx(
@@ -307,13 +254,13 @@ const TradeBTC = () => {
           <CurrencyInputPanel
             currency={currencyIn}
             amount={currencyAmountIn}
-            customCurrencyList={BTC_TRADE_CURRENCIES}
+            customCurrencyList={UTXO_TRADE_CURRENCIES}
             onCurrencySelect={onCurrencyInSelect}
             onCurrencyInput={onCurrencyInInput} />
           <CurrencyInputPanel
             currency={currencyOut}
             amount={currencyAmountOut}
-            customCurrencyList={BTC_TRADE_CURRENCIES}
+            customCurrencyList={UTXO_TRADE_CURRENCIES}
             onCurrencySelect={onCurrencyOutSelect}
             onCurrencyInput={onCurrencyOutInput} />
           <Button
@@ -338,4 +285,4 @@ const TradeBTC = () => {
   );
 };
 
-export default TradeBTC;
+export default TradeUTXO;

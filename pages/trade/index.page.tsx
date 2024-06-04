@@ -2,14 +2,14 @@ import * as React from 'react';
 import clsx from 'clsx';
 import * as Ariakit from '@ariakit/react';
 
-import TradeBTC from './TradeBTC';
 import TradeEVM from './TradeEVM';
+import TradeBTC from './TradeUTXO';
 
 const Trade = () => {
   const [
     mode,
     setMode
-  ] = React.useState<'evm' | 'btc'>('evm');
+  ] = React.useState<'evm' | 'utxo'>('evm');
 
   return (
     <div
@@ -58,12 +58,12 @@ const Trade = () => {
               'ring-2',
               'ring-blue-500',
               'ring-opacity-50',
-              mode === 'btc' && 'bg-blue-500'
+              mode === 'utxo' && 'bg-blue-500'
             )}
             as='button'
-            onClick={() => setMode('btc')}
+            onClick={() => setMode('utxo')}
             id='btc'>
-            btc trade
+            utxo trade
           </Ariakit.Tab>
         </Ariakit.TabList>
         <Ariakit.TabPanel tabId='evm'>
