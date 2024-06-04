@@ -62,7 +62,7 @@ const Trade = () => {
             )}
             as='button'
             onClick={() => setMode('utxo')}
-            id='btc'>
+            id='utxo'>
             utxo trade
           </Ariakit.Tab>
         </Ariakit.TabList>
