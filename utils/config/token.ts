@@ -5,22 +5,37 @@ import {
 
 import { nativeOnChain } from 'utils/hooks/web3/use-native-currency';
 
+const zeroAddress = '0x0000000000000000000000000000000000000000' as const;
+
 enum SupportedChainID {
-    EthereumMainnet = 1,
-    PolygonMainnet = 137,
-    BSCMainnet = 56,
-    Avalanche = 43114,
-    Fantom = 250,
-    Optimism = 10,
-    Arbitrum = 42161,
-    Base = 8453
-  }
-  enum NonEVMSupportedChainID {
-    BTC = -3980891822
+  EthereumMainnet = 1,
+  PolygonMainnet = 137,
+  BSCMainnet = 56,
+  Avalanche = 43114,
+  Fantom = 250,
+  Optimism = 10,
+  Arbitrum = 42161,
+  Base = 8453,
 }
 
-const NATIVE_CURRENCY: { [key in SupportedChainID]:
-    {name: string; symbol: string; };
+enum UTXOSupportedChainID {
+  BTC = -3980891822,
+    BCH = -174457306,
+    LTC = -33463083,
+    DOGE = -3143381382,
+}
+
+type AllSupportedChainIds = SupportedChainID | UTXOSupportedChainID;
+
+enum UTXOTokenSymbol {
+  BTC = 'BTC',
+  LTC = 'LTC',
+  DOGE = 'DOGE',
+  BCH = 'BCH',
+}
+
+const NATIVE_CURRENCY: {
+  [key in SupportedChainID]: { name: string; symbol: string; };
 } = {
   [SupportedChainID.PolygonMainnet]: {
     symbol: 'MATIC',
@@ -56,7 +71,7 @@ const NATIVE_CURRENCY: { [key in SupportedChainID]:
   }
 };
 
-const WRAPPED_NATIVE_CURRENCY: { [key in SupportedChainID]: Token; } = {
+const WRAPPED_NATIVE_CURRENCY: { [key in SupportedChainID]: Token } = {
   [SupportedChainID.PolygonMainnet]: new Token(
     SupportedChainID.PolygonMainnet,
     '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
@@ -116,7 +131,7 @@ const WRAPPED_NATIVE_CURRENCY: { [key in SupportedChainID]: Token; } = {
 };
 
 // generate object of array for stable token USDT and USDC on each chain
-const STABLE_TOKENS: { [key in SupportedChainID]: Token[]; } = {
+const STABLE_TOKENS: { [key in SupportedChainID]: Token[] } = {
   [SupportedChainID.PolygonMainnet]: [
     new Token(
       SupportedChainID.PolygonMainnet,
@@ -248,31 +263,65 @@ const STABLE_TOKENS: { [key in SupportedChainID]: Token[]; } = {
   ]
 };
 
+const UTXO_TOKENS: {
+  [key in UTXOSupportedChainID]?: Token
+} = {
+  [UTXOSupportedChainID.BTC]: new Token(
+    UTXOSupportedChainID.BTC,
+    zeroAddress,
+    8,
+    UTXOTokenSymbol.BTC,
+    'Bitcoin'
+  ),
+  [UTXOSupportedChainID.LTC]: new Token(
+    UTXOSupportedChainID.LTC,
+    zeroAddress,
+    8,
+    UTXOTokenSymbol.LTC,
+    'Litecoin'
+  ),
+  [UTXOSupportedChainID.DOGE]: new Token(
+    UTXOSupportedChainID.DOGE,
+    zeroAddress,
+    8,
+    UTXOTokenSymbol.DOGE,
+    'Doge'
+  ),
+  [UTXOSupportedChainID.BCH]: new Token(
+    UTXOSupportedChainID.BCH,
+    zeroAddress,
+    8,
+    UTXOTokenSymbol.BCH,
+    'Bitcoin Cash'
+  )
+};
+
 const THORCHAIN_SUPPORTED_NETWORKS = [
   SupportedChainID.EthereumMainnet,
-  SupportedChainID.Avalanche
+  SupportedChainID.Avalanche,
+  SupportedChainID.BSCMainnet
 ];
 const THORCHAIN_SUPPORTED_CURRENCIES: Currency[] = [
   nativeOnChain(SupportedChainID.EthereumMainnet),
-  nativeOnChain(SupportedChainID.Avalanche)
+  nativeOnChain(SupportedChainID.Avalanche),
+  nativeOnChain(SupportedChainID.BSCMainnet)
 ];
 enum CrossChainTradeProtocol {
-    CROSS_CHAIN_STARGATE = 'CROSS_CHAIN_STARGATE',
-    CROSS_CHAIN_CELER = 'CROSS_CHAIN_CELER',
-    CROSS_CHAIN_THORCHAIN = 'CROSS_CHAIN_THORCHAIN',
+  CROSS_CHAIN_STARGATE = 'CROSS_CHAIN_STARGATE',
+  CROSS_CHAIN_CELER = 'CROSS_CHAIN_CELER',
+  CROSS_CHAIN_THORCHAIN = 'CROSS_CHAIN_THORCHAIN',
 }
-enum BTCTradeType {
-    BTC_TO_NATIVE = 'BTC_TO_NATIVE',
-    NATIVE_TO_BTC = 'NATIVE_TO_BTC',
-}
+
 export {
   WRAPPED_NATIVE_CURRENCY,
   STABLE_TOKENS,
+  UTXO_TOKENS,
   NATIVE_CURRENCY,
   SupportedChainID,
   CrossChainTradeProtocol,
-  NonEVMSupportedChainID,
   THORCHAIN_SUPPORTED_NETWORKS,
   THORCHAIN_SUPPORTED_CURRENCIES,
-  BTCTradeType
+  UTXOSupportedChainID
 };
+
+export type { AllSupportedChainIds };

@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import type { AppProps } from 'next/app';
+import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import {
   Web3ReactHooks,
@@ -12,6 +13,11 @@ import {
   CONNECTIONS
 } from 'utils/helpers/web3/connectors';
 import 'styles/global.css';
+
+const XDefiWalletProvider = dynamic(
+  () => import('../utils/context/XDefiWalletContext'),
+  { ssr: false }
+);
 
 function Web3Provider({ children }: { children: ReactNode; }) {
   const connections = CONNECTIONS;
@@ -42,7 +48,9 @@ const MyApp = ({
         <title>Unizen DEX Aggregator Example Project</title>
       </Head>
       <Web3Provider>
-        <Component {...pageProps} />
+        <XDefiWalletProvider>
+          <Component {...pageProps} />
+        </XDefiWalletProvider>
       </Web3Provider>
     </>
   );

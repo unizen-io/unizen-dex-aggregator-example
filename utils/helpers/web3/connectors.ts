@@ -45,11 +45,42 @@ function getConnection(c: Connector | WalletType): Connection {
   }
 }
 
+function getIsXDeFi(): boolean {
+  return (
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore // Ignore to avoid errors in mobile app precommit
+    typeof window !== 'undefined' &&
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore // Ignore to avoid errors in mobile app precommit
+    (window as any).xfi
+  ) ?? false;
+}
+function getIsXDeFiBitcoin(): boolean {
+  return (
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore // Ignore to avoid errors in mobile app precommit
+    typeof window !== 'undefined' &&
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore // Ignore to avoid errors in mobile app precommit
+      (window as any).xfi &&
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore // Ignore to avoid errors in mobile app precommit
+      (window as any).xfi.bitcoin
+  ) ?? false;
+}
+
+function getIsNeedToTriggerXDeFiBitcoin(): boolean {
+  return getIsXDeFi() && !getIsXDeFiBitcoin();
+}
+
 export {
   CONNECTIONS,
   getConnection,
   WalletType,
-  injectedConnection
+  injectedConnection,
+  getIsNeedToTriggerXDeFiBitcoin,
+  getIsXDeFi,
+  getIsXDeFiBitcoin
 };
 
 export type { Connection };
