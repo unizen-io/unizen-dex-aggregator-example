@@ -34,7 +34,8 @@ const useXDefiWalletStore = create<XDefiWalletStore>(set => ({
     [UTXOSupportedChainID.BTC]: undefined,
     [UTXOSupportedChainID.DOGE]: undefined,
     [UTXOSupportedChainID.LTC]: undefined,
-    [UTXOSupportedChainID.BCH]: undefined
+    [UTXOSupportedChainID.BCH]: undefined,
+    [UTXOSupportedChainID.GAIA]: undefined
   },
   setAccount: account => set({ account }),
   setActive: active => set({ active }),

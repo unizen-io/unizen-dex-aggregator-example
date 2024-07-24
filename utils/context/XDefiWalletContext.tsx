@@ -1,7 +1,13 @@
 
 import * as React from 'react';
+import { assets } from 'chain-registry';
 import { withErrorBoundary } from 'react-error-boundary';
 import { useEffectOnce } from 'react-use';
+import {
+  Logger,
+  WalletManager
+} from '@cosmos-kit/core';
+import { wallets as xdefiWallets } from '@cosmos-kit/xdefi';
 
 import { UTXOSupportedChainID } from 'utils/config/token';
 import {
@@ -10,7 +16,6 @@ import {
   getIsXDeFiBitcoin
 } from 'utils/helpers/web3/connectors';
 import { useXDefiWalletStore } from 'utils/hooks/useXDefiWalletStore';
-
 interface ActiveXDefiWallet {
     account: string | undefined;
     active: boolean;
@@ -35,7 +40,8 @@ const mapChainIdToConnector = {
   [UTXOSupportedChainID.BTC]: typeof window !== 'undefined' && (window as any).xfi?.bitcoin,
   [UTXOSupportedChainID.DOGE]: typeof window !== 'undefined' && (window as any).xfi?.dogecoin,
   [UTXOSupportedChainID.LTC]: typeof window !== 'undefined' && (window as any).xfi?.litecoin,
-  [UTXOSupportedChainID.BCH]: typeof window !== 'undefined' && (window as any).xfi?.bitcoincash
+  [UTXOSupportedChainID.BCH]: typeof window !== 'undefined' && (window as any).xfi?.bitcoincash,
+  [UTXOSupportedChainID.GAIA]: typeof window !== 'undefined' && (window as any).xfi?.keplr
 };
 
 function XDefiWalletProvider({ children }: { children: React.ReactNode; }) {
@@ -59,6 +65,35 @@ function XDefiWalletProvider({ children }: { children: React.ReactNode; }) {
 
   const isXDeFi = getIsXDeFi();
   const handleActive = async (chainId: UTXOSupportedChainID) => {
+    if (chainId === UTXOSupportedChainID.GAIA) {
+      const walletManager = new WalletManager(
+        ['cosmoshub'],
+        [xdefiWallets[0]],
+        new Logger('NONE'),
+        false,
+        undefined,
+        undefined,
+        assets
+      );
+
+      const wallet = walletManager
+        .getWalletRepo('cosmoshub')
+        .getWallet('xdefi-extension');
+
+      await wallet?.connect();
+
+      await wallet?.initOfflineSigner();
+      const accounts = await wallet?.offlineSigner?.getAccounts();
+      if (!accounts) {
+        return;
+      }
+      setAccount(accounts?.[0]?.address);
+      setActive(true);
+      setChainId(chainId);
+      setAllAccountsByChainId(chainId, accounts[0]?.address);
+
+      return;
+    }
     const connector = mapChainIdToConnector[chainId];
     if (getIsXDeFiBitcoin()) {
       await connector?.request(
@@ -88,6 +123,7 @@ function XDefiWalletProvider({ children }: { children: React.ReactNode; }) {
       handleActive(UTXOSupportedChainID.DOGE);
       handleActive(UTXOSupportedChainID.LTC);
       handleActive(UTXOSupportedChainID.BCH);
+      handleActive(UTXOSupportedChainID.GAIA);
     }
   }, [active]);
 
@@ -96,6 +132,7 @@ function XDefiWalletProvider({ children }: { children: React.ReactNode; }) {
       handleActive(UTXOSupportedChainID.DOGE);
       handleActive(UTXOSupportedChainID.LTC);
       handleActive(UTXOSupportedChainID.BCH);
+      handleActive(UTXOSupportedChainID.GAIA);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);

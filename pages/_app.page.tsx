@@ -2,6 +2,8 @@ import React, { ReactNode } from 'react';
 import type { AppProps } from 'next/app';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
+import { ChainProvider } from '@cosmos-kit/react';
+import { wallets as xdefiWallets } from '@cosmos-kit/xdefi';
 import {
   Web3ReactHooks,
   Web3ReactProvider
@@ -48,9 +50,26 @@ const MyApp = ({
         <title>Unizen DEX Aggregator Example Project</title>
       </Head>
       <Web3Provider>
-        <XDefiWalletProvider>
-          <Component {...pageProps} />
-        </XDefiWalletProvider>
+        <ChainProvider
+          walletModal={() => <></>}
+          endpointOptions={{
+            isLazy: true,
+            endpoints: {
+              cosmoshub: {
+                rpc: [{
+                  url: 'https://cosmos-rpc.publicnode.com:443',
+                  headers: {}
+                }]
+              }
+            }
+          }}
+          assetLists={[]}
+          chains={['cosmoshub']}
+          wallets={[...xdefiWallets]}>
+          <XDefiWalletProvider>
+            <Component {...pageProps} />
+          </XDefiWalletProvider>
+        </ChainProvider>
       </Web3Provider>
     </>
   );
