@@ -27,8 +27,8 @@ interface SingleQuoteAPIProps {
     uuid?: string | undefined;
 }
 
-const API_UNIZEN_IO_LINK = 'https://api.zcx.com';
-// const API_UNIZEN_IO_LINK = 'http://localhost:3008';
+// const API_UNIZEN_IO_LINK = 'https://api.zcx.com';
+const API_UNIZEN_IO_LINK = 'http://localhost:3008';
 function getSingleQuoteURL({
   fromTokenAddress,
   toTokenAddress,

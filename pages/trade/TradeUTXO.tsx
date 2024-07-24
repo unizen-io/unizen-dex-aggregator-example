@@ -12,8 +12,7 @@ import { useWeb3React } from '@web3-react/core';
 import CurrencyInputPanel from 'components/CurrencyInputPanel';
 import Wallet from 'components/Wallet';
 import {
-  THORCHAIN_SUPPORTED_CURRENCIES,
-  UTXO_TOKENS,
+  THORCHAIN_SUPPORTED_NETWORKS,
   UTXOSupportedChainID
 } from 'utils/config/token';
 import { CrossChainQuoteCallData } from 'utils/config/type';
@@ -26,23 +25,27 @@ import {
   mapChainIdToConnector,
   useXDefiWallet
 } from 'utils/context/XDefiWalletContext';
+import useCurrencyList from 'utils/hooks/web3/use-currency-list';
 
-const UTXO_TRADE_CURRENCIES = [
-  ...(Object.values(UTXO_TOKENS) as Currency[]),
-  ...THORCHAIN_SUPPORTED_CURRENCIES
-];
 const TradeUTXO = () => {
   const { account, provider } = useWeb3React();
+  const currencyList = useCurrencyList();
+  const thorChainSourceCurrencyList = currencyList.filter(currency => THORCHAIN_SUPPORTED_NETWORKS.includes(currency.chainId));
+  // For Thorchain, only support native
+  const thorChainDestinationCurrencyList = currencyList.filter(currency =>
+    THORCHAIN_SUPPORTED_NETWORKS.includes(currency.chainId) &&
+    (currency.isNative || currency.address === AddressZero)
+  );
   const { allAccountsByChainId, handleConnectAll, activeXDefiWallet } = useXDefiWallet();
 
   const [
     currencyIn,
     setCurrencyIn
-  ] = React.useState(THORCHAIN_SUPPORTED_CURRENCIES[0]);
+  ] = React.useState<Currency>();
   const [
     currencyOut,
     setCurrencyOut
-  ] = React.useState(UTXO_TRADE_CURRENCIES[0]);
+  ] = React.useState<Currency>();
   const [
     currencyAmountIn,
     setCurrencyAmountIn
@@ -78,8 +81,8 @@ const TradeUTXO = () => {
     let crossChainParams: any;
     if (amount && currencyOut && currencyIn) {
       crossChainParams = {
-        fromTokenAddress: AddressZero,
-        toTokenAddress: AddressZero,
+        fromTokenAddress: currencyIn.isNative ? AddressZero : currencyIn.address,
+        toTokenAddress: currencyOut.isNative ? AddressZero : currencyOut.address,
         sourceChainId: currencyIn.chainId,
         destinationChainId: currencyOut?.chainId,
         sender: isUTXOSourceChain ? allAccountsByChainId[currencyIn.chainId as UTXOSupportedChainID] : account,
@@ -106,7 +109,7 @@ const TradeUTXO = () => {
       }
       setQuote(crossQuoteJSON[0]);
       if (crossQuoteJSON[0]?.dstTrade.toTokenAmount) {
-        setCurrencyAmountOut(formatUnits(crossQuoteJSON?.[0]?.dstTrade.toTokenAmount, currencyOut.decimals));
+        setCurrencyAmountOut(formatUnits(crossQuoteJSON?.[0]?.dstTrade.toTokenAmount, currencyOut?.decimals));
       }
     }
   };
@@ -141,13 +144,14 @@ const TradeUTXO = () => {
   };
 
   const handleConfirmTrade = async () => {
-    if (currencyIn.chainId) {
+    if (currencyIn?.chainId && currencyOut?.chainId) {
       const url = getCrossSwapURL(currencyIn.chainId);
 
       const params = {
         transactionData: quote?.transactionData,
         nativeValue: quote?.nativeValue,
-        account: isUTXOSourceChain ? allAccountsByChainId[currencyIn.chainId as UTXOSupportedChainID] : account
+        account: isUTXOSourceChain ? allAccountsByChainId[currencyIn.chainId as UTXOSupportedChainID] : account,
+        receiver: isUTXODestinationChain ? allAccountsByChainId[currencyOut.chainId as UTXOSupportedChainID] : account
       };
 
       const data = await fetch(url, {
@@ -171,21 +175,21 @@ const TradeUTXO = () => {
     }
   };
   const handleSendTransaction = async () => {
-    const inboundAddress = await handleFetchInboundAddress();
-    const sourceChainId = quote.srcTrade?.tokenFrom?.chainId;
-    const currentChainInboundAddress = inboundAddress?.find(
-      (address: { chain: any; }) => address.chain === sourceChainId as any
-    )?.address;
-
     const expiry = quote.transactionData.expiry;
     const currentTimestamp = Math.floor(new Date().getTime() / 1000);
 
     if (currentTimestamp > expiry) {
       throw new Error('Expired transaction');
     }
+    const sourceChainId = quote.srcTrade?.tokenFrom?.chainId;
     const isUTXOSourceChain = Object.values(UTXOSupportedChainID).includes(sourceChainId as any);
 
     if (isUTXOSourceChain) {
+      const inboundAddress = await handleFetchInboundAddress();
+
+      const currentChainInboundAddress = inboundAddress?.find(
+        (address: { chain: any; }) => address.chain === sourceChainId as any
+      )?.address;
       if (swapData.data.params[0].recipient.toLowerCase() !== currentChainInboundAddress.toLowerCase()) {
         throw new Error('Invalid inbound address, please fetch latest quote');
       }
@@ -200,13 +204,10 @@ const TradeUTXO = () => {
       );
     }
     if (!isUTXOSourceChain) {
-      if (swapData.to.toLowerCase() !== currentChainInboundAddress.toLowerCase()) {
-        throw new Error('Invalid inbound address, please fetch latest quote');
-      }
       provider?.getSigner(account)?.sendTransaction({
         to: swapData.to,
         data: swapData.data,
-        value: swapData.nativeValue
+        value: swapData.nativeValue || '0'
       });
     }
   };
@@ -254,13 +255,13 @@ const TradeUTXO = () => {
           <CurrencyInputPanel
             currency={currencyIn}
             amount={currencyAmountIn}
-            customCurrencyList={UTXO_TRADE_CURRENCIES}
+            customCurrencyList={thorChainSourceCurrencyList}
             onCurrencySelect={onCurrencyInSelect}
             onCurrencyInput={onCurrencyInInput} />
           <CurrencyInputPanel
             currency={currencyOut}
             amount={currencyAmountOut}
-            customCurrencyList={UTXO_TRADE_CURRENCIES}
+            customCurrencyList={thorChainDestinationCurrencyList}
             onCurrencySelect={onCurrencyOutSelect}
             onCurrencyInput={onCurrencyOutInput} />
           <Button

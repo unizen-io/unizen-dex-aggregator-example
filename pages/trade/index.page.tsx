@@ -69,7 +69,7 @@ const Trade = () => {
         <Ariakit.TabPanel tabId='evm'>
           <TradeEVM />
         </Ariakit.TabPanel>
-        <Ariakit.TabPanel tabId='btc'>
+        <Ariakit.TabPanel tabId='utxo'>
           <TradeBTC />
         </Ariakit.TabPanel>
       </Ariakit.TabProvider>
