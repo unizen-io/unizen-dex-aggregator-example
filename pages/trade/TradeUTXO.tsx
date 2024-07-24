@@ -1,6 +1,8 @@
 import React from 'react';
 import clsx from 'clsx';
+import { cosmos } from 'juno-network';
 import { Button } from '@ariakit/react';
+import { useChain } from '@cosmos-kit/react';
 import { AddressZero } from '@ethersproject/constants';
 import {
   formatUnits,
@@ -10,8 +12,11 @@ import { Currency } from '@uniswap/sdk-core';
 import { useWeb3React } from '@web3-react/core';
 
 import CurrencyInputPanel from 'components/CurrencyInputPanel';
+import ApproveButton from 'components/TradeModals/ApproveButton';
 import Wallet from 'components/Wallet';
+import { UNIZEN_CONTRACT_ADDRESS } from 'utils/config/address';
 import {
+  SupportedChainID,
   THORCHAIN_SUPPORTED_NETWORKS,
   UTXOSupportedChainID
 } from 'utils/config/token';
@@ -67,12 +72,12 @@ const TradeUTXO = () => {
     swapData,
     setSwapData
   ] = React.useState<any>();
-
+  const { getSigningStargateClient } = useChain('cosmoshub');
   const isUTXOSourceChain = currencyIn?.chainId ? Object.values(UTXOSupportedChainID).includes(currencyIn.chainId) : false;
   const isUTXODestinationChain = currencyOut?.chainId ?
     Object.values(UTXOSupportedChainID).includes(currencyOut?.chainId) :
     false;
-
+  const sourceChainId = quote?.srcTrade?.tokenFrom?.chainId;
   const handleFetchQuote = async () => {
     setIsFetchingQuote(true);
 
@@ -181,8 +186,43 @@ const TradeUTXO = () => {
     if (currentTimestamp > expiry) {
       throw new Error('Expired transaction');
     }
-    const sourceChainId = quote.srcTrade?.tokenFrom?.chainId;
+
     const isUTXOSourceChain = Object.values(UTXOSupportedChainID).includes(sourceChainId as any);
+
+    // Cosmos transaction
+    if (sourceChainId === UTXOSupportedChainID.GAIA) {
+      const inboundAddress = await handleFetchInboundAddress();
+
+      const currentChainInboundAddress = inboundAddress?.find(
+        (address: { chain: any; }) => address.chain === sourceChainId as any
+      )?.address;
+      if (swapData.data.params[0].recipient.toLowerCase() !== currentChainInboundAddress.toLowerCase()) {
+        throw new Error('Invalid inbound address, please fetch latest quote');
+      }
+      const keplr = (window as any).xfi?.keplr;
+      if (!keplr) return;
+
+      const signerAddr = allAccountsByChainId[UTXOSupportedChainID.GAIA];
+      const { send } = cosmos.bank.v1beta1.MessageComposer.withTypeUrl;
+
+      const client = await getSigningStargateClient();
+
+      if (!signerAddr) {
+        throw new Error('Invalid signer address. Please check your wallet');
+      }
+
+      const param = swapData.data.params[0];
+      const msg = send(param.msg);
+      const fee = param.fee;
+
+      await client.signAndBroadcast(
+        signerAddr,
+        [msg],
+        fee,
+        param.memo
+      );
+      return;
+    }
 
     if (isUTXOSourceChain) {
       const inboundAddress = await handleFetchInboundAddress();
@@ -211,6 +251,8 @@ const TradeUTXO = () => {
       });
     }
   };
+
+  const isShowApproveButton = !isUTXOSourceChain && !currencyIn?.isNative;
   return (
     <>
       <div
@@ -275,6 +317,14 @@ const TradeUTXO = () => {
             className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>
             3. Generate tx data
           </Button>
+          {isShowApproveButton && swapData ?
+            <ApproveButton
+              currency={currencyIn}
+              amount={quote?.srcTrade.fromTokenAmount}
+              contractAddress={swapData ?
+                UNIZEN_CONTRACT_ADDRESS[swapData.contractVersion as 'v1' | 'v2'][sourceChainId as SupportedChainID] :
+                undefined} /> :
+            null}
           <Button
             onClick={handleSendTransaction}
             className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-80'>

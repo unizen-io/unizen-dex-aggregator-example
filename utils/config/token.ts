@@ -23,6 +23,7 @@ enum UTXOSupportedChainID {
     BCH = -174457306,
     LTC = -33463083,
     DOGE = -3143381382,
+    GAIA = -978111860,
 }
 
 type AllSupportedChainIds = SupportedChainID | UTXOSupportedChainID;
@@ -293,6 +294,13 @@ const UTXO_TOKENS: {
     8,
     UTXOTokenSymbol.BCH,
     'Bitcoin Cash'
+  ),
+  [UTXOSupportedChainID.GAIA]: new Token(
+    UTXOSupportedChainID.GAIA,
+    zeroAddress,
+    6,
+    'GAIA',
+    'GAIA'
   )
 };
 
@@ -303,7 +311,8 @@ const THORCHAIN_SUPPORTED_NETWORKS = [
   UTXOSupportedChainID.BCH,
   UTXOSupportedChainID.BTC,
   UTXOSupportedChainID.DOGE,
-  UTXOSupportedChainID.LTC
+  UTXOSupportedChainID.LTC,
+  UTXOSupportedChainID.GAIA
 ];
 const THORCHAIN_SUPPORTED_CURRENCIES: Currency[] = [
   nativeOnChain(SupportedChainID.EthereumMainnet),
