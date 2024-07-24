@@ -299,7 +299,11 @@ const UTXO_TOKENS: {
 const THORCHAIN_SUPPORTED_NETWORKS = [
   SupportedChainID.EthereumMainnet,
   SupportedChainID.Avalanche,
-  SupportedChainID.BSCMainnet
+  SupportedChainID.BSCMainnet,
+  UTXOSupportedChainID.BCH,
+  UTXOSupportedChainID.BTC,
+  UTXOSupportedChainID.DOGE,
+  UTXOSupportedChainID.LTC
 ];
 const THORCHAIN_SUPPORTED_CURRENCIES: Currency[] = [
   nativeOnChain(SupportedChainID.EthereumMainnet),
