@@ -27,8 +27,8 @@ interface SingleQuoteAPIProps {
     uuid?: string | undefined;
 }
 
-const API_UNIZEN_IO_LINK = 'https://api.zcx.com';
-// const API_UNIZEN_IO_LINK = 'http://localhost:3008';
+// const API_UNIZEN_IO_LINK = 'https://api.zcx.com';
+const API_UNIZEN_IO_LINK = 'http://localhost:3008';
 function getSingleQuoteURL({
   fromTokenAddress,
   toTokenAddress,
@@ -41,7 +41,7 @@ function getSingleQuoteURL({
   uuid
 }: SingleQuoteAPIProps) {
   // eslint-disable-next-line max-len
-  return `${API_UNIZEN_IO_LINK}/trade/v1/${chainId}/quote/single?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&deadline=${deadline}&isExactOut=${isExactOut}&isSplit=${isSplit}&slippage=${slippage}&uuid=${uuid}`;
+  return `${API_UNIZEN_IO_LINK}/trade/v1/${chainId}/quote/single?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&deadline=${deadline}&isExactOut=${isExactOut}&isSplit=${isSplit}&slippage=${slippage}&uuid=${uuid}&version=v2`;
 }
 function getSingleSwapURL(chainId: SupportedChainID) {
   return `${API_UNIZEN_IO_LINK}/trade/v1/${chainId}/swap/single`;

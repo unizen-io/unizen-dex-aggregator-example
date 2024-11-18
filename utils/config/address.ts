@@ -1,42 +1,17 @@
-import PROD_CONTRACT_ADDRESS from '@unizen-io/unizen-contract-addresses/production.json';
 
 import { SupportedChainID } from './token';
 
-const UNIZEN_CONTRACT_ADDRESS: {
-    [key in 'v1' | 'v2' | 'v3']: {
-        [key in SupportedChainID]: string;
-    }
+const UNIZEN_ROUTER_ADDRESS: {
+  [key in SupportedChainID]: string;
 } = {
-  v1: {
-    [SupportedChainID.EthereumMainnet]: PROD_CONTRACT_ADDRESS.v1.ethereum,
-    [SupportedChainID.BSCMainnet]: PROD_CONTRACT_ADDRESS.v1.bsc,
-    [SupportedChainID.PolygonMainnet]: PROD_CONTRACT_ADDRESS.v1.polygon,
-    [SupportedChainID.Fantom]: PROD_CONTRACT_ADDRESS.v1.fantom,
-    [SupportedChainID.Avalanche]: PROD_CONTRACT_ADDRESS.v1.avax,
-    [SupportedChainID.Arbitrum]: PROD_CONTRACT_ADDRESS.v1.arbitrum,
-    [SupportedChainID.Optimism]: PROD_CONTRACT_ADDRESS.v1.optimism,
-    [SupportedChainID.Base]: PROD_CONTRACT_ADDRESS.v1.base
-  },
-  v2: {
-    [SupportedChainID.EthereumMainnet]: PROD_CONTRACT_ADDRESS.v2.ethereum,
-    [SupportedChainID.BSCMainnet]: PROD_CONTRACT_ADDRESS.v2.bsc,
-    [SupportedChainID.PolygonMainnet]: PROD_CONTRACT_ADDRESS.v2.polygon,
-    [SupportedChainID.Fantom]: PROD_CONTRACT_ADDRESS.v2.fantom,
-    [SupportedChainID.Avalanche]: PROD_CONTRACT_ADDRESS.v2.avax,
-    [SupportedChainID.Arbitrum]: PROD_CONTRACT_ADDRESS.v2.arbitrum,
-    [SupportedChainID.Optimism]: PROD_CONTRACT_ADDRESS.v2.optimism,
-    [SupportedChainID.Base]: ''
-  },
-  v3: {
-    [SupportedChainID.EthereumMainnet]: PROD_CONTRACT_ADDRESS.v3.ethereum,
-    [SupportedChainID.BSCMainnet]: PROD_CONTRACT_ADDRESS.v3.bsc,
-    [SupportedChainID.PolygonMainnet]: PROD_CONTRACT_ADDRESS.v3.polygon,
-    [SupportedChainID.Fantom]: '',
-    [SupportedChainID.Avalanche]: PROD_CONTRACT_ADDRESS.v3.avax,
-    [SupportedChainID.Arbitrum]: PROD_CONTRACT_ADDRESS.v3.arbitrum,
-    [SupportedChainID.Optimism]: PROD_CONTRACT_ADDRESS.v3.optimism,
-    [SupportedChainID.Base]: PROD_CONTRACT_ADDRESS.v3.base
-  }
+  [SupportedChainID.EthereumMainnet]: '0x0',
+  [SupportedChainID.BSCMainnet]: '0x8d463636D26cDde64f8142E5b741e1a20Fcd97Bc',
+  [SupportedChainID.PolygonMainnet]: '0x12265487B3b4034656Dd980B92886e892db3c17B',
+  [SupportedChainID.Fantom]: '0x0',
+  [SupportedChainID.Avalanche]: '0x0C1dd4253C4a157D015de34BBA5E489b6F420E34',
+  [SupportedChainID.Arbitrum]: '0xb2a18894e693DaA604460333543A2963311D9d40',
+  [SupportedChainID.Optimism]: '0xFC380cbF5f4ACE571313d55beF5Cf4F14F05Aa22',
+  [SupportedChainID.Base]: '0xed442cCfde7596b46Deb923620A2FEf9999976Af'
 };
 
-export { UNIZEN_CONTRACT_ADDRESS };
+export { UNIZEN_ROUTER_ADDRESS };
