@@ -25,7 +25,7 @@
     "@interchain-ui/react": "^1.23.28",
     "@tailwindcss/forms": "^0.5.3",
     "@uniswap/sdk-core": "^3.2.6",
-    "@unizen-io/unizen-contract-addresses": "^0.0.14",
+    "@unizen-io/unizen-contract-addresses": "^0.0.15",
     "@web3-react/core": "^8.2.0",
     "@web3-react/metamask": "^8.2.1",
     "@web3-react/types": "^8.2.0",
@@ -67,5 +67,6 @@
     "tailwindcss": "^3.3.2",
     "tailwindcss-pseudo-elements": "^2.0.0",
     "typescript": "^5.0.2"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
