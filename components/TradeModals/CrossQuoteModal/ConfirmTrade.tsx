@@ -5,7 +5,7 @@ import { formatUnits } from '@ethersproject/units';
 import { Currency } from '@uniswap/sdk-core';
 import { useWeb3React } from '@web3-react/core';
 
-import { UNIZEN_CONTRACT_ADDRESS } from 'utils/config/address';
+import { UNIZEN_ROUTER_ADDRESS } from 'utils/config/address';
 import { SupportedChainID } from 'utils/config/token';
 import {
   CrossChainQuoteCallData,
@@ -80,7 +80,7 @@ const ConfirmTrade = ({
   };
 
   const handleSendTransaction = async () => {
-    const contractAddress = UNIZEN_CONTRACT_ADDRESS[swapData.contractVersion as 'v1' | 'v2' | 'v3'][chainId as SupportedChainID];
+    const contractAddress = UNIZEN_ROUTER_ADDRESS[chainId as SupportedChainID];
 
     provider?.getSigner().sendTransaction({
       from: account,

@@ -14,7 +14,7 @@ import { useWeb3React } from '@web3-react/core';
 import CurrencyInputPanel from 'components/CurrencyInputPanel';
 import ApproveButton from 'components/TradeModals/ApproveButton';
 import Wallet from 'components/Wallet';
-import { UNIZEN_CONTRACT_ADDRESS } from 'utils/config/address';
+import { UNIZEN_ROUTER_ADDRESS } from 'utils/config/address';
 import {
   SupportedChainID,
   THORCHAIN_SUPPORTED_NETWORKS,
@@ -322,7 +322,7 @@ const TradeUTXO = () => {
               currency={currencyIn}
               amount={quote?.srcTrade.fromTokenAmount}
               contractAddress={swapData ?
-                UNIZEN_CONTRACT_ADDRESS[swapData.contractVersion as 'v1' | 'v2'][sourceChainId as SupportedChainID] :
+                UNIZEN_ROUTER_ADDRESS[sourceChainId as SupportedChainID] :
                 undefined} /> :
             null}
           <Button

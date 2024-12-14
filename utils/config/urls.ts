@@ -41,7 +41,7 @@ function getSingleQuoteURL({
   uuid
 }: SingleQuoteAPIProps) {
   // eslint-disable-next-line max-len
-  return `${API_UNIZEN_IO_LINK}/trade/v1/${chainId}/quote/single?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&deadline=${deadline}&isExactOut=${isExactOut}&isSplit=${isSplit}&slippage=${slippage}&uuid=${uuid}`;
+  return `${API_UNIZEN_IO_LINK}/trade/v1/${chainId}/quote/single?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&deadline=${deadline}&isExactOut=${isExactOut}&isSplit=${isSplit}&slippage=${slippage}&uuid=${uuid}&version=v2`;
 }
 function getSingleSwapURL(chainId: SupportedChainID) {
   return `${API_UNIZEN_IO_LINK}/trade/v1/${chainId}/swap/single`;
@@ -60,7 +60,7 @@ function getCrossQuoteURL({
   uuid
 }: CrossQuoteAPIProps) {
   // eslint-disable-next-line max-len
-  return `${API_UNIZEN_IO_LINK}/trade/v1/${sourceChainId}/quote/cross?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&deadline=${deadline}&destinationChainId=${destinationChainId}&sender=${sender}&isExactOut=${isExactOut}&slippage=${slippage}&uuid=${uuid}&receiver=${receiver}`;
+  return `${API_UNIZEN_IO_LINK}/trade/v1/${sourceChainId}/quote/cross?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&deadline=${deadline}&destinationChainId=${destinationChainId}&sender=${sender}&isExactOut=${isExactOut}&slippage=${slippage}&uuid=${uuid}&receiver=${receiver}&version=v2`;
 }
 
 function getCrossSwapURL(chainId: SupportedChainID) {
